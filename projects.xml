@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projects>
+  <project id="p1">
+    <title>Flood Relief - Noakhali</title>
+    <ngo>Hope Foundation</ngo>
+    <verified>true</verified>
+    <goal>1000000</goal>
+    <raised>450000</raised>
+    <image>images/project1.jpg</image>
+    <short>Immediate relief for families affected by the August floods.</short>
+  </project>
+
+  <project id="p2">
+    <title>School Rebuild - Feni</title>
+    <ngo>EduCare Bangladesh</ngo>
+    <verified>false</verified>
+    <goal>600000</goal>
+    <raised>125000</raised>
+    <image>images/project2.jpg</image>
+    <short>Rebuilding two primary schools damaged by flood water.</short>
+  </project>
+
+  <project id="p3">
+    <title>Clean Water Initiative - Cumilla</title>
+    <ngo>Water for All</ngo>
+    <verified>true</verified>
+    <goal>400000</goal>
+    <raised>220000</raised>
+    <image>images/project3.jpg</image>
+    <short>Installing tube wells and filtration units in 8 villages.</short>
+  </project>
+</projects>
+
+
+

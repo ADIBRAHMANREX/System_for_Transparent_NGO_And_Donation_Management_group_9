@@ -1,0 +1,71 @@
+/* Reset (small) */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Body */
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #222;
+  line-height: 1.4;
+  background: #fff;
+  padding-bottom: 40px;
+}
+
+/* Header */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 36px;
+  background: linear-gradient(90deg, #fff, #f8f9fb);
+  border-bottom: 1px solid #e6e6e6;
+}
+.brand { color: #1656a2; font-size: 26px; }
+.main-nav ul { list-style: none; display: flex; gap: 18px; align-items:center; }
+.main-nav a { text-decoration: none; color: #333; padding: 6px 8px; }
+.main-nav a:hover { color: #1656a2; }
+
+/* Hero */
+.hero { display: flex; gap: 24px; padding: 40px; align-items: center; max-width: 1100px; margin: 18px auto; }
+.hero-left { flex:1; }
+.hero-right { flex:1; text-align: right; }
+.hero-img { max-width: 380px; width:100%; border-radius: 8px; }
+
+/* Buttons */
+.btn {
+  display:inline-block; padding: 10px 16px; background: #1656a2; color: #fff; border-radius: 6px; text-decoration: none;
+}
+.btn:hover { background: #0f4176; }
+
+/* Features */
+.features { display:flex; gap: 16px; max-width:1100px; margin: 12px auto; padding: 0 18px; }
+.features article { flex:1; padding: 18px; border-radius: 8px; background:#f6f8fb; text-align:center; }
+.small-icon { width:54px; height:54px; object-fit:cover; margin-bottom:8px; }
+
+/* Footer layout (copied / adapted from your original) */
+#footer {
+  background-color: #f4f4f9;
+  padding: 40px 60px;
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+  font-family: Arial, sans-serif;
+  margin-top: 28px;
+}
+#news-section { width: 34%; }
+.highlight { color: #1656a2; }
+#news-form { margin-top: 12px; display:flex; gap:10px; }
+#news-input { padding:10px; width:66%; border-radius:4px; border:1px solid #ccc; }
+#news-submit { padding:10px 14px; border-radius:4px; background:#1656a2; color:#fff; border:none; cursor:pointer; }
+#footer-menu { width: 28%; }
+#menu-columns { display:flex; gap:28px; }
+#menu-columns ul { list-style:none; padding:0; }
+#menu-columns li { padding:6px 0; }
+#contact-section { width: 28%; }
+.icon { display:inline-flex; width:36px; height:36px; align-items:center; justify-content:center; background:#1656a2; color:#fff; border-radius:4px; margin-right:8px; text-decoration:none; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .hero { flex-direction: column; text-align:center; }
+  #footer { flex-direction: column; padding: 24px; }
+  .features { flex-direction: column; }
+}

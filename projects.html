@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Believe - Projects</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* small extra styles for project cards */
+    .projects-wrap { max-width:1100px; margin: 18px auto; padding: 0 18px; display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px; }
+    .project-card { background:#fff; padding:14px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.06); display:flex; flex-direction:column; gap:8px; }
+    .project-card img { width:100%; height:160px; object-fit:cover; border-radius:6px; }
+    .progress { height:10px; background:#eee; border-radius:6px; overflow:hidden; }
+    .progress > span { display:block; height:100%; background:linear-gradient(90deg,#1656a2,#0f4176); }
+    .project-meta { font-size:14px; color:#555; }
+    .project-actions { margin-top:auto; display:flex; gap:8px; }
+  </style>
+</head>
+<body>
+  <header class="top-bar">
+    <a href="index.html" class="brand">Believe</a>
+    <nav class="main-nav">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="projects.html">Our Projects</a></li>
+        <li><a href="donate.html">Donate</a></li>
+        <li><a href="login.html">Login</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section style="max-width:1100px;margin:18px auto;padding:0 18px;">
+      <h2>Ongoing Projects</h2>
+      <p>Explore verified and ongoing efforts. Click "Donate" to support a specific project.</p>
+    </section>
+
+    <section class="projects-wrap" id="projects-wrap">
+      <!-- Project cards will be injected here by JS -->
+    </section>
+  </main>
+
+  <script>
+    // Load projects.xml and render cards (works when served from a local dev server)
+    async function loadProjects() {
+      try {
+        const resp = await fetch('projects.xml');
+        if (!resp.ok) throw new Error('Could not load projects.xml (use Live Server)');
+        const text = await resp.text();
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(text, 'application/xml');
+        const projects = xml.querySelectorAll('project');
+        const wrap = document.getElementById('projects-wrap');
+        projects.forEach(p => {
+          const id = p.getAttribute('id');
+          const title = p.querySelector('title')?.textContent || '';
+          const ngo = p.querySelector('ngo')?.textContent || '';
+          const verified = p.querySelector('verified')?.textContent === 'true';
+          const goal = Number(p.querySelector('goal')?.textContent || 0);
+          const raised = Number(p.querySelector('raised')?.textContent || 0);
+          const img = p.querySelector('image')?.textContent || '';
+          const short = p.querySelector('short')?.textContent || '';
+
+          const percent = goal > 0 ? Math.round((raised/goal)*100) : 0;
+
+          const card = document.createElement('article');
+          card.className = 'project-card';
+          card.innerHTML = `
+            <img src="${img}" alt="${title} image" onerror="this.src='images/placeholder-rect.jpg'">
+            <h3>${title}</h3>
+            <p class="project-meta"><strong>${ngo}</strong> ${verified ? '<span style="color:green">✓ Verified</span>' : ''}</p>
+            <p>${short}</p>
+            <div class="project-meta">Raised: ৳${raised.toLocaleString()} / ৳${goal.toLocaleString()}</div>
+            <div class="progress" aria-hidden="true"><span style="width:${percent}%"></span></div>
+            <div class="project-actions">
+              <a class="btn" href="donation.html?proj=${encodeURIComponent(title)}">Donate</a>
+
+              <a class="btn" style="background:#eee;color:#222;text-decoration:none;" href="ngo_profile.html?ngo=${encodeURIComponent(ngo)}">View NGO</a>
+            </div>
+          `;
+          wrap.appendChild(card);
+        });
+      } catch (err) {
+        console.error(err);
+        document.getElementById('projects-wrap').innerHTML = '<p style="padding:12px">Could not load projects. If you opened the file via file:// your browser may block XML fetch. Use Live Server or any static server.</p>';
+      }
+    }
+    loadProjects();
+  </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donor Dashboard - Believe</title>
+    <link rel="stylesheet" href="donor_style.css">
+</head>
+
+<body>
+
+<div class="header">
+    <h1>Believe - Donor Dashboard</h1>
+    <button id="logoutBtn">Logout</button>
+</div>
+
+<div class="profile-box">
+    <h2>Welcome, <span id="donorName">User</span></h2>
+    <p>Email: <span id="donorEmail">example@email.com</span></p>
+</div>
+
+<hr>
+
+<h2>Your Donation History</h2>
+<table class="history-table">
+    <tr>
+        <th>Project</th>
+        <th>Date</th>
+        <th>Amount</th>
+        <th>Status</th>
+    </tr>
+    <tbody id="historyBody">
+        <!-- rows injected by JS -->
+    </tbody>
+</table>
+
+
+
+<hr>
+
+<h2>Ongoing Projects</h2>
+
+<div class="project-card">
+    <img src="" alt="Project Image placeholder">
+    <h3>Flood Relief - Noakhali</h3>
+    <p>Emergency relief for affected families</p>
+    <button class="donate-btn">Donate Now</button>
+</div>
+
+<div class="project-card">
+    <img src="" alt="Project Image placeholder">
+    <h3>School Rebuild - Feni</h3>
+    <p>Rebuilding damaged primary schools</p>
+    <button class="donate-btn">Donate Now</button>
+</div>
+
+<div class="project-card">
+    <img src="" alt="Project Image placeholder">
+    <h3>Clean Water Initiative - Cumilla</h3>
+    <p>Installing tube wells and filters</p>
+    <button class="donate-btn">Donate Now</button>
+</div>
+
+
+<script src="donor_script.js"></script>
+
+</body>
+</html>
