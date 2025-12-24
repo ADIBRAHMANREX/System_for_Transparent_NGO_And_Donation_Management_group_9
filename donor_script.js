@@ -15,6 +15,61 @@ document.getElementById('logoutBtn').onclick = () => {
   localStorage.removeItem('demoSession');
   window.location.href = 'login.html';
 };
+//ongoingprojectselect
+function loadApprovedProjectsForDonor() {
+  const list = document.getElementById("projectList");
+  const noMsg = document.getElementById("noProjectsMsg");
+
+  if (!list) return; // safety
+
+  let approved = [];
+  try {
+    approved = JSON.parse(localStorage.getItem("approvedProjects") || "[]");
+  } catch (e) {
+    approved = [];
+  }
+
+  list.innerHTML = "";
+
+  if (approved.length === 0) {
+    noMsg.style.display = "block";
+    return;
+  }
+  noMsg.style.display = "none";
+
+  approved.forEach((p, index) => {
+    const card = document.createElement("div");
+    card.className = "project-card";
+
+    card.innerHTML = `
+      <img src="" alt="Project Image placeholder">
+      <h3>${p.title}</h3>
+      <p>${p.desc || ""}</p>
+      <p><b>NGO:</b> ${p.ngoName || "Unknown"}</p>
+      <p><b>Goal:</b> BDT ${p.goal || 0}</p>
+      <p><b>Raised:</b> BDT ${p.raised || 0}</p>
+      <button class="donate-btn" data-proj="${encodeURIComponent(p.title)}">
+        Donate Now
+      </button>
+    `;
+
+    list.appendChild(card);
+  });
+
+  // button click using event delegation
+  list.addEventListener("click", (e) => {
+    if (e.target.classList.contains("donate-btn")) {
+      const proj = e.target.getAttribute("data-proj");
+      window.location.href = `donation.html?proj=${proj}`;
+    }
+  }, { once: true });
+}
+
+// Call it when dashboard loads
+loadApprovedProjectsForDonor();
+
+
+
 
 // Load donation history (stored by donation.js in localStorage["donorHistory"])
 // Load donation history (stored by donation.js in localStorage["donorHistory"])

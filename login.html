@@ -160,6 +160,11 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
   if (user.role === 'ngo') {
     if (userStatus !== 'approved') {
       alert('Your NGO account is pending admin approval. You can login later once approved.');
+
+      //  STEP 1: store who is logged-in NGO
+
+      localStorage.setItem('currentNGO', user.email);
+
       // Send to a simple "pending" page
       window.location.href = 'ngo_pending.html';
     } else {
@@ -169,6 +174,11 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
   } else {
     // Donor
     alert('Login successful (demo). Redirecting to Donor dashboard...');
+
+
+    localStorage.setItem('currentDonor', user.email);
+    
+
     window.location.href = 'donor_dashboard.html'; // use your actual donor dashboard file
   }
 });
