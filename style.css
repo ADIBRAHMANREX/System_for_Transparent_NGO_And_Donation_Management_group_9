@@ -4,9 +4,9 @@
 /* Body */
 body {
   font-family: Arial, Helvetica, sans-serif;
-  color: #222;
+  color: #222222;
   line-height: 1.4;
-  background: #fff;
+  background: #ffffff2e;
   padding-bottom: 40px;
 }
 
@@ -34,7 +34,7 @@ body {
 .btn {
   display:inline-block; padding: 10px 16px; background: #1656a2; color: #fff; border-radius: 6px; text-decoration: none;
 }
-.btn:hover { background: #0f4176; }
+.btn:hover { background: #760f3d; }
 
 /* Features */
 .features { display:flex; gap: 16px; max-width:1100px; margin: 12px auto; padding: 0 18px; }
