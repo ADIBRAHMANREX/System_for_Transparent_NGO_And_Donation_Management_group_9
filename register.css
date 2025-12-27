@@ -1,0 +1,15 @@
+.reg-wrap{max-width:460px;margin:28px auto;padding:18px}
+.reg-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.reg-card input{width:100%;padding:10px;margin-bottom:10px;border-radius:8px;border:1px solid #cfcfcf}
+.reg-sub{color:#666;margin-top:6px}
+.reg-steps{display:flex;gap:8px;margin:12px 0 16px}
+.step-dot{width:10px;height:10px;border-radius:50%;background:#ddd}
+.step-dot.active{background:#111}
+.reg-actions{display:flex;gap:10px}
+.btn.secondary{background:#eee;color:#111}
+.role-grid{display:grid;grid-template-columns:1fr;gap:10px;margin:10px 0}
+.role-card{border:1px solid #ddd;border-radius:12px;padding:12px;background:#fafafa;text-align:left;cursor:pointer}
+.role-card.active{border-color:#111;background:#f2f2f2}
+.role-card span{display:block;color:#666;font-size:13px;margin-top:4px}
+.reg-error{background:#ffe8e8;border:1px solid #ffb3b3;color:#8a1f1f;padding:10px;border-radius:10px;margin:10px 0}
+.reg-link{margin-top:12px;color:#666;font-size:14px}
