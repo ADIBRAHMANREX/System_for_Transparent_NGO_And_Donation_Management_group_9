@@ -73,71 +73,83 @@ loadApprovedProjectsForDonor();
 
 // Load donation history (stored by donation.js in localStorage["donorHistory"])
 // Load donation history (stored by donation.js in localStorage["donorHistory"])
-const historyTableBody = document.getElementById('historyBody');
-if (historyTableBody) {
+function renderDonorHistory() {
+  const historyTableBody = document.getElementById('historyBody');
+  if (!historyTableBody) return;
+
+  const session = JSON.parse(localStorage.getItem('demoSession') || 'null');
+  const donorEmail = (session && session.role === "donor") ? session.email : null;
+
   const history = JSON.parse(localStorage.getItem('donorHistory') || '[]');
+
+  // ✅ show only THIS donor’s donations (optional but correct)
+  const myHistory = donorEmail
+    ? history.filter(d => d.donorEmail === donorEmail)
+    : history;
 
   historyTableBody.innerHTML = '';
 
-  if (history.length === 0) {
+  if (myHistory.length === 0) {
     const row = document.createElement('tr');
     const cell = document.createElement('td');
-    cell.colSpan = 4; // now 4 columns (Project, Date, Amount, Status)
-    cell.textContent = 'No donations yet (demo). Use the Donate buttons below or the Projects page.';
+    cell.colSpan = 4;
+    cell.textContent = 'No donations yet (demo).';
     row.appendChild(cell);
     historyTableBody.appendChild(row);
-  } else {
-    history.forEach(d => {
-      const row = document.createElement('tr');
-
-      // Project
-      const projectCell = document.createElement('td');
-      projectCell.textContent = d.project || 'N/A';
-
-      // Date
-      const dateCell = document.createElement('td');
-      dateCell.textContent = d.date || '';
-
-      // Amount
-      const amountCell = document.createElement('td');
-      amountCell.textContent = `BDT ${d.amount}`;
-
-      // Status
-      const statusCell = document.createElement('td');
-      const statusSpan = document.createElement('span');
-      const statusValue = (d.status || 'processing').toLowerCase();
-
-      statusSpan.classList.add('status-badge');
-
-      switch (statusValue) {
-        case 'received':
-          statusSpan.classList.add('status-received');
-          statusSpan.textContent = 'Received by NGO';
-          break;
-        case 'implementing':
-          statusSpan.classList.add('status-implementing');
-          statusSpan.textContent = 'In Implementation';
-          break;
-        case 'completed':
-          statusSpan.classList.add('status-completed');
-          statusSpan.textContent = 'Completed';
-          break;
-        default:
-          statusSpan.classList.add('status-processing');
-          statusSpan.textContent = 'Processing';
-      }
-
-      statusCell.appendChild(statusSpan);
-
-      row.appendChild(projectCell);
-      row.appendChild(dateCell);
-      row.appendChild(amountCell);
-      row.appendChild(statusCell);
-
-      historyTableBody.appendChild(row);
-    });
+    return;
   }
+
+  myHistory.forEach(d => {
+    const row = document.createElement('tr');
+
+    const projectCell = document.createElement('td');
+    projectCell.textContent = d.project || 'N/A';
+
+    const dateCell = document.createElement('td');
+    dateCell.textContent = d.date || '';
+
+    const amountCell = document.createElement('td');
+    amountCell.textContent = `BDT ${d.amount}`;
+
+    const statusCell = document.createElement('td');
+    const statusSpan = document.createElement('span');
+    const statusValue = (d.status || 'processing').toLowerCase();
+
+    statusSpan.classList.add('status-badge');
+
+    switch (statusValue) {
+      case 'received':
+        statusSpan.classList.add('status-received');
+        statusSpan.textContent = 'Received by NGO';
+        break;
+      case 'implementing':
+        statusSpan.classList.add('status-implementing');
+        statusSpan.textContent = 'In Implementation';
+        break;
+      case 'completed':
+        statusSpan.classList.add('status-completed');
+        statusSpan.textContent = 'Completed';
+        break;
+      case 'reported':
+        statusSpan.classList.add('status-reported');
+        statusSpan.textContent = 'Reported';
+        break;
+      default:
+        statusSpan.classList.add('status-processing');
+        statusSpan.textContent = 'Processing';
+    }
+
+    statusCell.appendChild(statusSpan);
+
+    row.appendChild(projectCell);
+    row.appendChild(dateCell);
+    row.appendChild(amountCell);
+    row.appendChild(statusCell);
+
+    historyTableBody.appendChild(row);
+  });
 }
+
 // Load project progress from projects.xml and show in cards
 async function loadProjectProgressForDonor() {
   try {
@@ -189,18 +201,18 @@ async function loadProjectProgressForDonor() {
 loadProjectProgressForDonor();
 
 
-// Donate buttons in the "Ongoing Projects" cards
-const donateButtons = document.querySelectorAll('.donate-btn');
 
-donateButtons.forEach((btn, index) => {
-  btn.onclick = function () {
-    const projectNames = [
-  "Flood Relief - Noakhali",
-  "School Rebuild - Feni",
-  "Clean Water Initiative - Cumilla"
-];
 
-    const selectedProject = projectNames[index];
-    window.location.href = `donation.html?proj=${encodeURIComponent(selectedProject)}`;
-  };
+
+window.addEventListener("storage", (e) => {
+  if (e.key === "donorHistory") {
+    // reload the donor view whenever NGO updates donorHistory
+    renderDonorHistory(); 
+  }
 });
+
+setInterval(() => {
+  renderDonorHistory();
+}, 2000);
+
+renderDonorHistory();
