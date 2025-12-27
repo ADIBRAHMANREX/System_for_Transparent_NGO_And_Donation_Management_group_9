@@ -4,9 +4,9 @@
 /* Body */
 body {
   font-family: Arial, Helvetica, sans-serif;
-  color: #222222;
+  color: #0a0a0afe;
   line-height: 1.4;
-  background: #ffffff2e;
+  background: #02b7a5c7;
   padding-bottom: 40px;
 }
 
@@ -16,8 +16,8 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 14px 36px;
-  background: linear-gradient(90deg, #fff, #f8f9fb);
-  border-bottom: 1px solid #e6e6e6;
+  background: linear-gradient(90deg, #1a191954, #080b1000);
+  border-bottom: 1px solid #067a3e;
 }
 .brand { color: #1656a2; font-size: 26px; }
 .main-nav ul { list-style: none; display: flex; gap: 18px; align-items:center; }
@@ -68,4 +68,35 @@ body {
   .hero { flex-direction: column; text-align:center; }
   #footer { flex-direction: column; padding: 24px; }
   .features { flex-direction: column; }
+}
+
+/* ===== FIXED Sliding Hover Effect ===== */
+
+.main-nav a {
+  position: relative;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: color 0.3s ease;
+}
+
+/* underline inside the link */
+.main-nav a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 2px;              /* 🔑 moved INSIDE */
+  width: 0;
+  height: 3px;
+  background: linear-gradient(45deg, #194b4f, #33fffc);
+  transition: width 0.35s ease;
+  transform: translateX(-50%);
+  border-radius: 4px;
+}
+
+.main-nav a:hover::after {
+  width: 70%;               /* looks cleaner than 100% */
+}
+
+.main-nav a:hover {
+  color: #1656a2;
 }
