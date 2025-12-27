@@ -61,11 +61,14 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   const u = data.user;
 
   if(u.role === "admin") return window.location.href = "admin_dashboard.php";
-  if(u.role === "ngo"){
-    if(u.status !== "approved") return window.location.href = "ngo_pending.html";
-    return window.location.href = "ngo.html";
-  }
-  return window.location.href = "donor_dashboard.html";
+
+if(u.role === "ngo"){
+  if(u.status !== "approved") return window.location.href = "ngo_pending.php";
+  return window.location.href = "ngo_dashboard.php";
+}
+
+return window.location.href = "donor_dashboard.php";
+
 });
 </script>
 </body>
