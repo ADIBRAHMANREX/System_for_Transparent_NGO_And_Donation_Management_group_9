@@ -49,9 +49,10 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     password: document.getElementById("password").value
   };
 
-  const res = await fetch("auth_login.php", {
+  const res = await fetch("./auth_login.php", {
     method: "POST",
     headers: {"Content-Type":"application/json"},
+    credentials: "same-origin",
     body: JSON.stringify(payload)
   });
 
@@ -62,14 +63,14 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 
   if(u.role === "admin") return window.location.href = "admin_dashboard.php";
 
-if(u.role === "ngo"){
-  if(u.status !== "approved") return window.location.href = "ngo_pending.php";
-  return window.location.href = "ngo_dashboard.php";
-}
+  if(u.role === "ngo"){
+    if(u.status !== "approved") return window.location.href = "ngo_pending.php";
+    return window.location.href = "ngo.php";
+  }
 
-return window.location.href = "donor_dashboard.php";
-
+  return window.location.href = "donor_dashboard.php";
 });
 </script>
 </body>
 </html>
+
