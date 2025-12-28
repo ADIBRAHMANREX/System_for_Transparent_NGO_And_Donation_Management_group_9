@@ -1,3 +1,28 @@
+<?php
+declare(strict_types=1);
+session_start();
+
+if (!isset($_SESSION['user'])) {
+  header("Location: index.html");
+  exit;
+}
+
+$user = $_SESSION['user'];
+
+if (($user['role'] ?? '') !== 'ngo') {
+  header("Location: index.html");
+  exit;
+}
+
+if (($user['status'] ?? '') !== 'approved') {
+  header("Location: ngo_pending.php");
+  exit;
+}
+?>
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -127,9 +152,10 @@
   <header class="head">
   <a href="index.html" class="brand">Believe</a>
 
-  <button id="logoutBtn" class="logout-btn">
-      Logout
-  </button>
+  <a href="logout.php" class="logout-btn" style="text-decoration:none;display:inline-block;">
+  Logout
+</a>
+
 </header>
 
     <main class="dash">
@@ -137,7 +163,8 @@
 
     <!-- NGO summary + compliance -->
     <div class="card">
-      <h3 id="ngo-name">NGO Name (demo)</h3>
+      <h3 id="ngo-name"><?= htmlspecialchars($user['name']) ?></h3>
+
       <p>Compliance status: <strong id="ngo-status">Unverified</strong></p>
       <p style="font-size:14px;color:#555;">
         This is a frontend demo. Status is based on whether this NGO has any verified projects in <code>projects.xml</code>.
@@ -222,6 +249,10 @@
 
 
 
+<script>
+  window.PHP_SESSION_USER = <?= json_encode($_SESSION['user'], JSON_UNESCAPED_UNICODE) ?>;
+</script>
 <script src="ngo_js.js"></script>
+
 </body>
 </html>

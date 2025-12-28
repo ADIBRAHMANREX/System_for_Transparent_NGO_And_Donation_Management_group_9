@@ -1,5 +1,6 @@
  // 1) Get logged-in NGO from demoSession
-  const session = JSON.parse(localStorage.getItem('demoSession') || 'null');
+  const session = window.PHP_SESSION_USER || null;
+
   const ngoNameEl = document.getElementById('ngo-name');
   const ngoStatusEl = document.getElementById('ngo-status');
   const projectsList = document.getElementById('ngo-projects-list');
@@ -168,15 +169,19 @@ if (incomingForThisNgo.length === 0) {
 }
 
   }
-  document.getElementById("logoutBtn").onclick = () => {
-    localStorage.removeItem("demoSession");
-    window.location.href = "login.html";
-};
+
+  //
+  const logoutBtn = document.getElementById("logoutBtn");
+if (logoutBtn) {
+  logoutBtn.onclick = () => window.location.href = "logout.php";
+}
+
 
 
 
 // Show or hide project submission based on approval status
-const currentSession = JSON.parse(localStorage.getItem('demoSession') || '{}');
+const currentSession = window.PHP_SESSION_USER || {};
+
 if (currentSession.status !== 'approved') {
   document.getElementById('projectSubmissionCard').style.display = 'none';
 }
@@ -212,7 +217,7 @@ document.getElementById('projectSubmissionForm')?.addEventListener('submit', (e)
 
 
 function renderNGOApprovalSections() {
-  const currentSession = JSON.parse(localStorage.getItem("demoSession") || "{}");
+  const currentSession = window.PHP_SESSION_USER || {};
   const ngoId = currentSession.email;
   if (!ngoId) return;
 
