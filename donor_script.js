@@ -1,20 +1,25 @@
 
-// Load Donor Data from localStorage (demoSession created on login)
-const session = JSON.parse(localStorage.getItem('demoSession') || 'null');
+// Load Donor Data from localStorage (demoSession created on login
 
-if (session && session.role === 'donor') {
-  document.getElementById('donorName').innerText = session.name || 'Donor';
-  document.getElementById('donorEmail').innerText = session.email || 'Email Not Found';
+// ✅ Load Donor Data from PHP session
+if (window.PHP_SESSION_USER && window.PHP_SESSION_USER.role === "donor") {
+  document.getElementById("donorName").innerText =
+    window.PHP_SESSION_USER.name || "Donor";
+
+  document.getElementById("donorEmail").innerText =
+    window.PHP_SESSION_USER.email || "Email Not Found";
 } else {
-  document.getElementById('donorName').innerText = 'Guest Donor';
-  document.getElementById('donorEmail').innerText = 'Not logged in';
+  // Safety fallback (should never happen due to PHP protection)
+  window.location.href = "index.html";
 }
 
+
+
 // Logout → clear session and go back to login
-document.getElementById('logoutBtn').onclick = () => {
-  localStorage.removeItem('demoSession');
-  window.location.href = 'login.html';
+document.getElementById("logoutBtn").onclick = () => {
+  window.location.href = "logout.php";
 };
+
 //ongoingprojectselect
 function loadApprovedProjectsForDonor() {
   const list = document.getElementById("projectList");
@@ -71,14 +76,14 @@ loadApprovedProjectsForDonor();
 
 
 
-// Load donation history (stored by donation.js in localStorage["donorHistory"])
+// Load donation history (stored by donation.js inn php
 // Load donation history (stored by donation.js in localStorage["donorHistory"])
 function renderDonorHistory() {
   const historyTableBody = document.getElementById('historyBody');
   if (!historyTableBody) return;
 
-  const session = JSON.parse(localStorage.getItem('demoSession') || 'null');
-  const donorEmail = (session && session.role === "donor") ? session.email : null;
+  const donorEmail = window.PHP_SESSION_USER?.email || null;
+
 
   const history = JSON.parse(localStorage.getItem('donorHistory') || '[]');
 

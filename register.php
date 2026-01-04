@@ -126,10 +126,13 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   }
 
   const res = await fetch("auth_register.php", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify(payload)
-  });
+  method: "POST",
+  headers: {"Content-Type":"application/json"},
+  credentials: "same-origin",
+  body: JSON.stringify(payload)
+});
+
+  
 
   const data = await res.json();
   if(!data.success) return showErr(data.error || "Registration failed.");

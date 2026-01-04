@@ -19,12 +19,18 @@ final class AuthController {
     return $_SESSION["csrf"];
   }
 
-  private static function requireCsrf(string $token): void {
-    self::startSession();
-    if (empty($_SESSION["csrf"]) || !hash_equals($_SESSION["csrf"], $token)) {
-      self::json(["success" => false, "error" => "Invalid CSRF token."], 400);
-    }
+ private static function requireCsrf(string $token): void {
+  self::startSession();
+
+  // ✅ DEBUG (temporary)
+  //error_log("CSRF SESSION: " . ($_SESSION["csrf"] ?? "NONE"));
+ // error_log("CSRF TOKEN: " . ($token ?: "EMPTY"));
+
+  if (empty($_SESSION["csrf"]) || !hash_equals($_SESSION["csrf"], $token)) {
+    self::json(["success" => false, "error" => "Invalid CSRF token."], 400);
   }
+}
+
 
   private static function json(array $payload, int $code = 200): void {
     http_response_code($code);

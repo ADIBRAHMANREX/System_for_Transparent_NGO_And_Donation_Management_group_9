@@ -49,12 +49,13 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     password: document.getElementById("password").value
   };
 
-  const res = await fetch("./auth_login.php", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    credentials: "same-origin",
-    body: JSON.stringify(payload)
-  });
+  const res = await fetch("auth_login.php", {
+  method: "POST",
+  headers: {"Content-Type":"application/json"},
+  credentials: "same-origin",
+  body: JSON.stringify(payload)
+});
+
 
   const data = await res.json();
   if(!data.success) return showErr(data.error || "Login failed.");
