@@ -2,6 +2,11 @@
 declare(strict_types=1);
 session_start();
 
+if (empty($_SESSION["csrf"])) {
+  $_SESSION["csrf"] = bin2hex(random_bytes(16));
+}
+
+
 if (!isset($_SESSION['user'])) {
   header("Location: index.html");
   exit;
