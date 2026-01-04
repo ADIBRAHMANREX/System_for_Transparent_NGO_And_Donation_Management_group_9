@@ -50,6 +50,7 @@ $ngos = UserModel::listNGOs();
     <h2>NGO Approvals</h2>
     <a class="btn secondary" href="logout.php">Logout</a>
   </div>
+<a href="admin_projects.php">Approve Projects</a>
 
   <table>
     <thead>

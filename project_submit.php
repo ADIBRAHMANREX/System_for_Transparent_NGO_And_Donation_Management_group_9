@@ -26,7 +26,8 @@ if (empty($_SESSION["csrf"]) || !hash_equals($_SESSION["csrf"], $csrf)) {
 }
 
 $title = trim((string)($body["title"] ?? ""));
-$desc  = trim((string)($body["desc"] ?? ""));
+$desc = trim((string)($body["desc"] ?? ($body["description"] ?? "")));
+
 $goal  = (float)($body["goal"] ?? 0);
 
 if ($title === "" || $desc === "") json_out(["success"=>false,"error"=>"Title/description required."], 422);
