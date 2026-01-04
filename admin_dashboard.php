@@ -38,6 +38,11 @@ $ngos = UserModel::listNGOs();
     .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
     a{color:#111;text-decoration:none}
   </style>
+
+  <script>
+  window.PHP_CSRF = "<?= htmlspecialchars($_SESSION['csrf']) ?>";
+</script>
+
 </head>
 <body>
 <div class="wrap">

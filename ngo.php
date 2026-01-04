@@ -147,6 +147,11 @@ if (($user['status'] ?? '') !== 'approved') {
   
 
   </style>
+
+  <script>
+  window.PHP_CSRF = "<?= htmlspecialchars($_SESSION['csrf']) ?>";
+</script>
+
 </head>
 <body>
   <header class="head">
