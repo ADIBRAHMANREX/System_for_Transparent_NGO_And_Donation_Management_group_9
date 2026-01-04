@@ -208,7 +208,34 @@ document.getElementById('projectSubmissionForm')?.addEventListener('submit', (e)
 });
 
 
-  localStorage.setItem('projectRequests', JSON.stringify(requests));
+ //repleace_submit_handaler
+ document.getElementById('projectSubmissionForm')
+.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const payload = {
+    csrf: window.PHP_CSRF,
+    title: projTitle.value.trim(),
+    description: projDesc.value.trim(),
+    goal: Number(projGoal.value)
+  };
+
+  const res = await fetch("project_submit.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await res.json();
+  if (!data.success) {
+    alert(data.error);
+    return;
+  }
+
+  document.getElementById("projSubmitMsg").style.display = "block";
+  e.target.reset();
+});
+
 
   document.getElementById('projSubmitMsg').style.display = 'block';
   e.target.reset();
