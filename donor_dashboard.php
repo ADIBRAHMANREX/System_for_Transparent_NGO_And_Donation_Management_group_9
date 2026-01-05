@@ -2,80 +2,148 @@
 declare(strict_types=1);
 session_start();
 
-// 1) Not logged in → go to index
+// Not logged in → index
 if (!isset($_SESSION["user"])) {
   header("Location: index.html");
   exit;
 }
-
 $user = $_SESSION["user"];
-
-// 2) Not a donor → go to index
 if (($user["role"] ?? "") !== "donor") {
   header("Location: index.html");
   exit;
 }
 
-// optional: regenerate token/pages etc (not required here)
+$payload = [
+  "name" => $user["name"] ?? "Donor",
+  "email" => $user["email"] ?? "",
+  "role" => $user["role"] ?? "donor",
+];
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Donor Dashboard - Believe</title>
+  <title>Donor Dashboard</title>
   <link rel="stylesheet" href="donor_style.css">
 </head>
-
 <body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-badge" aria-hidden="true"></div>
+        <div>
+          <div>Believe</div>
+          <div class="muted" style="font-weight:600; font-size:12px;">Donor Dashboard</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="btn" id="themeToggle" type="button">Theme</button>
+        <button class="btn btn-danger" id="logoutBtn" type="button">Logout</button>
+      </div>
+    </div>
+  </div>
 
-<div class="header">
-  <h1>Believe - Donor Dashboard</h1>
-  <button id="logoutBtn">Logout</button>
-</div>
+  <div class="container">
+    <div class="card">
+      <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:baseline; justify-content:space-between;">
+        <div>
+          <h2 style="margin:0;">Welcome, <span id="donorName"></span></h2>
+          <div class="muted" style="margin-top:6px;">Email: <span id="donorEmail"></span></div>
+        </div>
+        <div class="badge good" id="donorBadge">Active Donor</div>
+      </div>
 
-<div class="profile-box">
-  <h2>Welcome, <span id="donorName">User</span></h2>
-  <p>Email: <span id="donorEmail">example@email.com</span></p>
-</div>
+      <div class="hr"></div>
 
-<hr>
+      <div class="stats">
+        <div class="stat">
+          <div class="k">Total Donated</div>
+          <div class="v" id="statTotal">৳0</div>
+        </div>
+        <div class="stat">
+          <div class="k">Donations</div>
+          <div class="v" id="statCount">0</div>
+        </div>
+        <div class="stat">
+          <div class="k">Projects Supported</div>
+          <div class="v" id="statProjects">0</div>
+        </div>
+        <div class="stat">
+          <div class="k">Last Donation</div>
+          <div class="v" id="statLast">—</div>
+        </div>
+      </div>
+    </div>
 
-<h2>Your Donation History</h2>
-<table class="history-table">
-  <tr>
-    <th>Project</th>
-    <th>Date</th>
-    <th>Amount</th>
-    <th>Status</th>
-  </tr>
-  <tbody id="historyBody">
-    <!-- rows injected by JS -->
-  </tbody>
-</table>
+    <div class="grid">
+      <div class="card" style="grid-column: span 12;">
+        <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between;">
+          <h3 style="margin:0;">Donation History</h3>
+          <div class="controls">
+            <input id="historySearch" class="input" type="search" placeholder="Search by project..." autocomplete="off">
+            <select id="historyProject" class="small">
+              <option value="">All projects</option>
+            </select>
+            <select id="historyStatus" class="small">
+              <option value="">All status</option>
+              <option value="success">Success</option>
+              <option value="pending">Pending</option>
+              <option value="failed">Failed</option>
+            </select>
+            <button class="btn btn-primary" id="exportCsv" type="button">Export CSV</button>
+          </div>
+        </div>
 
-<hr>
+        <div class="hr"></div>
 
-<h2>Ongoing Projects</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Project</th>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr><td colspan="4" class="muted">No donations yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
 
-<p id="noProjectsMsg" style="display:none;">No approved projects yet.</p>
+      <div class="card" style="grid-column: span 12;">
+        <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between;">
+          <h3 style="margin:0;">Projects</h3>
+          <div class="controls">
+            <input id="projectSearch" class="input" type="search" placeholder="Search projects..." list="projectSuggestions" autocomplete="off">
+            <datalist id="projectSuggestions"></datalist>
 
-<div id="projectList">
-  <!-- Approved projects will be injected by JS -->
-</div>
+            <select id="projectSort" class="small">
+              <option value="recommended">Recommended</option>
+              <option value="mostRaised">Most raised</option>
+              <option value="highestProgress">Highest progress</option>
+              <option value="lowestGoal">Lowest goal</option>
+              <option value="az">A → Z</option>
+            </select>
 
-<!-- ✅ Make PHP session user available to JS -->
-<script>
-  window.PHP_SESSION_USER = <?= json_encode([
-    "id" => $user["id"] ?? null,
-    "name" => $user["name"] ?? "",
-    "email" => $user["email"] ?? "",
-    "role" => $user["role"] ?? "",
-    "status" => $user["status"] ?? ""
-  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
-</script>
+            <label class="badge" style="cursor:pointer; user-select:none;">
+              <input type="checkbox" id="favOnly" style="margin:0 8px 0 0; accent-color: var(--primary);">
+              Favorites only
+            </label>
+          </div>
+        </div>
 
-<script src="donor_script.js"></script>
+        <div class="hr"></div>
 
+        <div class="project-grid" id="projectsGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.DONOR_USER = <?php echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+  </script>
+  <script src="donor_script.js"></script>
 </body>
 </html>

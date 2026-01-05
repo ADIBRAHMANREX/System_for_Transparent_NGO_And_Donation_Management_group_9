@@ -1,223 +1,392 @@
+(function () {
+  const user = window.DONOR_USER || { name: "Donor", email: "", role: "donor" };
 
-// Load Donor Data from localStorage (demoSession created on login
+  const $ = (id) => document.getElementById(id);
 
-// ✅ Load Donor Data from PHP session
-if (window.PHP_SESSION_USER && window.PHP_SESSION_USER.role === "donor") {
-  document.getElementById("donorName").innerText =
-    window.PHP_SESSION_USER.name || "Donor";
+  // UI nodes
+  const donorName = $("donorName");
+  const donorEmail = $("donorEmail");
+  const logoutBtn = $("logoutBtn");
+  const themeToggle = $("themeToggle");
 
-  document.getElementById("donorEmail").innerText =
-    window.PHP_SESSION_USER.email || "Email Not Found";
-} else {
-  // Safety fallback (should never happen due to PHP protection)
-  window.location.href = "index.html";
-}
+  const statTotal = $("statTotal");
+  const statCount = $("statCount");
+  const statProjects = $("statProjects");
+  const statLast = $("statLast");
 
+  const historyBody = $("historyBody");
+  const historySearch = $("historySearch");
+  const historyProject = $("historyProject");
+  const historyStatus = $("historyStatus");
+  const exportCsv = $("exportCsv");
 
+  const projectsGrid = $("projectsGrid");
+  const projectSearch = $("projectSearch");
+  const projectSuggestions = $("projectSuggestions");
+  const projectSort = $("projectSort");
+  const favOnly = $("favOnly");
 
-// Logout → clear session and go back to login
-document.getElementById("logoutBtn").onclick = () => {
-  window.location.href = "logout.php";
-};
+  // Local storage keys
+  const HISTORY_KEY = "donorHistory";
+  const APPROVED_KEY = "approvedProjects";
+  const THEME_KEY = "donorTheme";
+  const FAV_KEY = `donorFavorites:${(user.email || "anon").toLowerCase()}`;
 
-//ongoingprojectselect
-function loadApprovedProjectsForDonor() {
-  const list = document.getElementById("projectList");
-  const noMsg = document.getElementById("noProjectsMsg");
-
-  if (!list) return; // safety
-
-  let approved = [];
-  try {
-    approved = JSON.parse(localStorage.getItem("approvedProjects") || "[]");
-  } catch (e) {
-    approved = [];
+  // ---------- Theme ----------
+  function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem(THEME_KEY, theme);
+    themeToggle.textContent = theme === "dark" ? "Light" : "Dark";
   }
+  const savedTheme = localStorage.getItem(THEME_KEY) || "light";
+  applyTheme(savedTheme);
 
-  list.innerHTML = "";
-
-  if (approved.length === 0) {
-    noMsg.style.display = "block";
-    return;
-  }
-  noMsg.style.display = "none";
-
-  approved.forEach((p, index) => {
-    const card = document.createElement("div");
-    card.className = "project-card";
-
-    card.innerHTML = `
-      <img src="" alt="Project Image placeholder">
-      <h3>${p.title}</h3>
-      <p>${p.desc || ""}</p>
-      <p><b>NGO:</b> ${p.ngoName || "Unknown"}</p>
-      <p><b>Goal:</b> BDT ${p.goal || 0}</p>
-      <p><b>Raised:</b> BDT ${p.raised || 0}</p>
-      <button class="donate-btn" data-proj="${encodeURIComponent(p.title)}">
-        Donate Now
-      </button>
-    `;
-
-    list.appendChild(card);
+  themeToggle?.addEventListener("click", () => {
+    const t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    applyTheme(t);
   });
 
-  // button click using event delegation
-  list.addEventListener("click", (e) => {
-    if (e.target.classList.contains("donate-btn")) {
-      const proj = e.target.getAttribute("data-proj");
-      window.location.href = `donation.html?proj=${proj}`;
+  // ---------- Logout ----------
+  logoutBtn?.addEventListener("click", async () => {
+    // Try PHP logout endpoint if present; otherwise wipe session-ish demo data
+    try {
+      await fetch("logout.php", { method: "POST" });
+    } catch (e) {}
+    // Many demo projects store current user in session only
+    window.location.href = "index.html";
+  });
+
+  // ---------- Helpers ----------
+  const fmtBDT = (n) => {
+    const num = Number(n || 0);
+    try {
+      return "৳" + num.toLocaleString("en-US");
+    } catch {
+      return "৳" + num;
     }
-  }, { once: true });
-}
+  };
 
-// Call it when dashboard loads
-loadApprovedProjectsForDonor();
+  const norm = (s) => String(s || "").toLowerCase().trim();
 
-
-
-
-// Load donation history (stored by donation.js inn php
-// Load donation history (stored by donation.js in localStorage["donorHistory"])
-function renderDonorHistory() {
-  const historyTableBody = document.getElementById('historyBody');
-  if (!historyTableBody) return;
-
-  const donorEmail = window.PHP_SESSION_USER?.email || null;
-
-
-  const history = JSON.parse(localStorage.getItem('donorHistory') || '[]');
-
-  // ✅ show only THIS donor’s donations (optional but correct)
-  const myHistory = donorEmail
-    ? history.filter(d => d.donorEmail === donorEmail)
-    : history;
-
-  historyTableBody.innerHTML = '';
-
-  if (myHistory.length === 0) {
-    const row = document.createElement('tr');
-    const cell = document.createElement('td');
-    cell.colSpan = 4;
-    cell.textContent = 'No donations yet (demo).';
-    row.appendChild(cell);
-    historyTableBody.appendChild(row);
-    return;
+  function safeJSON(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return fallback;
+      return JSON.parse(raw);
+    } catch {
+      return fallback;
+    }
   }
 
-  myHistory.forEach(d => {
-    const row = document.createElement('tr');
+  function uniq(arr) {
+    return Array.from(new Set(arr));
+  }
 
-    const projectCell = document.createElement('td');
-    projectCell.textContent = d.project || 'N/A';
+  // ---------- Data loading ----------
+  async function loadVerifiedProjectsFromXML() {
+    try {
+      const res = await fetch("projects.xml", { cache: "no-store" });
+      if (!res.ok) return [];
+      const xmlText = await res.text();
+      const doc = new DOMParser().parseFromString(xmlText, "application/xml");
+      const nodes = Array.from(doc.querySelectorAll("project"));
+      const projects = nodes
+        .map((p) => {
+          const get = (tag) => p.querySelector(tag)?.textContent?.trim() || "";
+          return {
+            id: p.getAttribute("id") || get("id") || get("title"),
+            title: get("title"),
+            ngo: get("ngo"),
+            verified: norm(get("verified")) === "true",
+            goal: Number(get("goal") || 0),
+            raised: Number(get("raised") || 0),
+            image: get("image"),
+            short: get("short"),
+            status: "approved",
+          };
+        })
+        .filter((p) => p.verified && p.title);
+      return projects;
+    } catch {
+      return [];
+    }
+  }
 
-    const dateCell = document.createElement('td');
-    dateCell.textContent = d.date || '';
+  async function loadProjects() {
+    const approved = safeJSON(APPROVED_KEY, []);
+    if (Array.isArray(approved) && approved.length > 0) {
+      // Normalize expected fields
+      return approved.map((p, i) => ({
+        id: p.id || p.projectId || p.title || `ap_${i}`,
+        title: p.title || p.projectTitle || "Untitled Project",
+        ngo: p.ngo || p.ngoName || "",
+        goal: Number(p.goal || p.target || 0),
+        raised: Number(p.raised || p.collected || 0),
+        image: p.image || p.img || "",
+        short: p.short || p.description || "",
+        status: p.status || "approved",
+      }));
+    }
+    // Fallback to projects.xml
+    return await loadVerifiedProjectsFromXML();
+  }
 
-    const amountCell = document.createElement('td');
-    amountCell.textContent = `BDT ${d.amount}`;
+  function loadHistory() {
+    const all = safeJSON(HISTORY_KEY, []);
+    if (!Array.isArray(all)) return [];
+    const email = norm(user.email);
+    // Try to match stored email field names
+    return all.filter((h) => {
+      const e = norm(h.email || h.donorEmail || h.userEmail);
+      return email && e === email;
+    });
+  }
 
-    const statusCell = document.createElement('td');
-    const statusSpan = document.createElement('span');
-    const statusValue = (d.status || 'processing').toLowerCase();
+  function loadFavorites() {
+    const favs = safeJSON(FAV_KEY, []);
+    return Array.isArray(favs) ? favs : [];
+  }
+  function saveFavorites(ids) {
+    localStorage.setItem(FAV_KEY, JSON.stringify(ids));
+  }
 
-    statusSpan.classList.add('status-badge');
+  // ---------- Render: Stats ----------
+  function renderStats(history) {
+    const amounts = history.map((h) => Number(h.amount || h.donationAmount || h.amt || 0));
+    const total = amounts.reduce((a, b) => a + b, 0);
+    const count = history.length;
 
-    switch (statusValue) {
-      case 'received':
-        statusSpan.classList.add('status-received');
-        statusSpan.textContent = 'Received by NGO';
-        break;
-      case 'implementing':
-        statusSpan.classList.add('status-implementing');
-        statusSpan.textContent = 'In Implementation';
-        break;
-      case 'completed':
-        statusSpan.classList.add('status-completed');
-        statusSpan.textContent = 'Completed';
-        break;
-      case 'reported':
-        statusSpan.classList.add('status-reported');
-        statusSpan.textContent = 'Reported';
-        break;
+    const projectNames = history.map((h) => h.project || h.projectTitle || h.title || "").filter(Boolean);
+    const projectsSupported = uniq(projectNames).length;
+
+    const last = history
+      .map((h) => new Date(h.date || h.donationDate || h.time || ""))
+      .filter((d) => !isNaN(d.getTime()))
+      .sort((a, b) => b.getTime() - a.getTime())[0];
+
+    statTotal.textContent = fmtBDT(total);
+    statCount.textContent = String(count);
+    statProjects.textContent = String(projectsSupported);
+    statLast.textContent = last ? last.toLocaleDateString() : "—";
+  }
+
+  // ---------- Render: History ----------
+  function fillHistoryProjectFilter(history) {
+    const names = uniq(history.map((h) => h.project || h.projectTitle || h.title || "").filter(Boolean)).sort();
+    historyProject.innerHTML = `<option value="">All projects</option>` + names.map((n) => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join("");
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function getFilteredHistory(history) {
+    const q = norm(historySearch.value);
+    const proj = historyProject.value;
+    const status = norm(historyStatus.value);
+
+    return history.filter((h) => {
+      const title = norm(h.project || h.projectTitle || h.title);
+      const st = norm(h.status || h.state || "success");
+      const matchQ = !q || title.includes(q);
+      const matchProj = !proj || (h.project || h.projectTitle || h.title) === proj;
+      const matchStatus = !status || st === status;
+      return matchQ && matchProj && matchStatus;
+    });
+  }
+
+  function renderHistory(history) {
+    const rows = getFilteredHistory(history);
+
+    if (!rows.length) {
+      historyBody.innerHTML = `<tr><td colspan="4" class="muted">No matching donations.</td></tr>`;
+      return;
+    }
+
+    historyBody.innerHTML = rows
+      .sort((a, b) => new Date(b.date || "").getTime() - new Date(a.date || "").getTime())
+      .map((h) => {
+        const title = h.project || h.projectTitle || h.title || "—";
+        const date = h.date || h.donationDate || h.time || "—";
+        const amount = Number(h.amount || h.donationAmount || h.amt || 0);
+        const status = (h.status || h.state || "success").toLowerCase();
+        return `
+          <tr>
+            <td>${escapeHtml(title)}</td>
+            <td>${escapeHtml(date)}</td>
+            <td>${fmtBDT(amount)}</td>
+            <td>${escapeHtml(status)}</td>
+          </tr>`;
+      })
+      .join("");
+  }
+
+  function downloadCSV(rows) {
+    const header = ["Project", "Date", "Amount", "Status"];
+    const lines = [header.join(",")];
+
+    rows.forEach((h) => {
+      const title = (h.project || h.projectTitle || h.title || "").replaceAll('"', '""');
+      const date = (h.date || h.donationDate || h.time || "").replaceAll('"', '""');
+      const amount = String(Number(h.amount || h.donationAmount || h.amt || 0));
+      const status = String((h.status || h.state || "success"));
+      lines.push(`"${title}","${date}","${amount}","${status}"`);
+    });
+
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "donation_history.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  // ---------- Render: Projects ----------
+  function updateSuggestions(projects) {
+    const titles = uniq(projects.map((p) => p.title).filter(Boolean)).sort((a, b) => a.localeCompare(b));
+    projectSuggestions.innerHTML = titles.map((t) => `<option value="${escapeHtml(t)}"></option>`).join("");
+  }
+
+  function sortProjects(list, mode) {
+    const arr = [...list];
+    switch (mode) {
+      case "mostRaised":
+        return arr.sort((a, b) => (b.raised || 0) - (a.raised || 0));
+      case "highestProgress":
+        return arr.sort((a, b) => (progress(b) - progress(a)));
+      case "lowestGoal":
+        return arr.sort((a, b) => (a.goal || 0) - (b.goal || 0));
+      case "az":
+        return arr.sort((a, b) => String(a.title).localeCompare(String(b.title)));
+      case "recommended":
       default:
-        statusSpan.classList.add('status-processing');
-        statusSpan.textContent = 'Processing';
+        // recommended = verified + higher progress first, then more raised
+        return arr.sort((a, b) => (progress(b) - progress(a)) || ((b.raised || 0) - (a.raised || 0)));
+    }
+  }
+
+  function progress(p) {
+    const g = Number(p.goal || 0);
+    const r = Number(p.raised || 0);
+    if (!g) return 0;
+    return Math.max(0, Math.min(1, r / g));
+  }
+
+  function getFilteredProjects(projects, favs) {
+    const q = norm(projectSearch.value);
+    let list = projects.filter((p) => norm(p.title).includes(q) || norm(p.ngo).includes(q));
+
+    if (favOnly.checked) {
+      list = list.filter((p) => favs.includes(p.id));
     }
 
-    statusCell.appendChild(statusSpan);
+    list = sortProjects(list, projectSort.value);
+    return list;
+  }
 
-    row.appendChild(projectCell);
-    row.appendChild(dateCell);
-    row.appendChild(amountCell);
-    row.appendChild(statusCell);
+  function badgeFor(p) {
+    const pct = progress(p) * 100;
+    if (pct >= 75) return { cls: "good", label: `${Math.round(pct)}% funded` };
+    if (pct >= 35) return { cls: "warn", label: `${Math.round(pct)}% funded` };
+    return { cls: "bad", label: `${Math.round(pct)}% funded` };
+  }
 
-    historyTableBody.appendChild(row);
-  });
-}
+  function renderProjects(projects, favs) {
+    const list = getFilteredProjects(projects, favs);
 
-// Load project progress from projects.xml and show in cards
-async function loadProjectProgressForDonor() {
-  try {
-    const resp = await fetch('projects.xml');
-    if (!resp.ok) throw new Error('Could not load projects.xml');
-    const text = await resp.text();
-    const xml = new DOMParser().parseFromString(text, 'application/xml');
-    const projects = xml.querySelectorAll('project');
+    if (!list.length) {
+      projectsGrid.innerHTML = `<div class="muted">No projects found.</div>`;
+      return;
+    }
 
-    const infoByTitle = {};
-    projects.forEach(p => {
-      const title = p.querySelector('title')?.textContent || '';
-      const goal = Number(p.querySelector('goal')?.textContent || 0);
-      const raised = Number(p.querySelector('raised')?.textContent || 0);
-      if (title) {
-        infoByTitle[title] = { goal, raised };
-      }
-    });
+    projectsGrid.innerHTML = list
+      .map((p) => {
+        const pct = Math.round(progress(p) * 100);
+        const b = badgeFor(p);
+        const isFav = favs.includes(p.id);
+        const imgStyle = p.image ? `style="background-image:url('${p.image.replaceAll("'", "%27")}')"` : "";
+        return `
+          <div class="card project-card">
+            <div class="project-img" ${imgStyle}></div>
+            <div class="project-body">
+              <div style="display:flex; align-items:start; justify-content:space-between; gap:10px;">
+                <div>
+                  <div class="project-title">${escapeHtml(p.title)}</div>
+                  <div class="project-meta">NGO: ${escapeHtml(p.ngo || "—")}</div>
+                </div>
+                <span class="badge ${b.cls}">${escapeHtml(b.label)}</span>
+              </div>
 
-    document.querySelectorAll('.project-card').forEach(card => {
-      const titleEl = card.querySelector('h3');
-      if (!titleEl) return;
-      const title = titleEl.textContent.trim();
-      const info = infoByTitle[title];
+              <div class="muted" style="font-size:13px; line-height:1.35; min-height:36px;">
+                ${escapeHtml(p.short || "Support this verified project and track impact transparently.")}
+              </div>
 
-      const wrap = document.createElement('div');
-      wrap.className = 'project-progress';
+              <div class="progress-wrap">
+                <div class="muted" style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
+                  <span>Raised: ${fmtBDT(p.raised || 0)}</span>
+                  <span>Goal: ${fmtBDT(p.goal || 0)}</span>
+                </div>
+                <div class="progress-bar"><div style="width:${pct}%"></div></div>
+              </div>
 
-      if (!info || !info.goal) {
-        wrap.innerHTML = '<p class="progress-label">Goal data not available (demo).</p>';
-      } else {
-        const percent = Math.min(100, Math.round((info.raised * 100) / info.goal));
-        wrap.innerHTML = `
-          <p class="progress-label">
-            Raised ৳${info.raised.toLocaleString()} of ৳${info.goal.toLocaleString()} (${percent}%)
-          </p>
-          <div class="progress"><span style="width:${percent}%"></span></div>
+              <div class="card-actions">
+                <button class="btn fav-btn" data-fav="${escapeHtml(p.id)}" type="button">
+                  ${isFav ? "★ Favorited" : "☆ Favorite"}
+                </button>
+                <a class="btn btn-primary donate-btn" href="donate.html" title="Donate to this project">Donate</a>
+              </div>
+            </div>
+          </div>
         `;
-      }
+      })
+      .join("");
+  }
 
-      card.appendChild(wrap);
+  function wireFavoriteClicks(projects, favs) {
+    projectsGrid.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-fav]");
+      if (!btn) return;
+      const id = btn.getAttribute("data-fav");
+      if (!id) return;
+
+      const has = favs.includes(id);
+      const next = has ? favs.filter((x) => x !== id) : [...favs, id];
+      favs.splice(0, favs.length, ...next);
+      saveFavorites(favs);
+      renderProjects(projects, favs);
     });
-  } catch (err) {
-    console.error(err);
   }
-}
 
-// Call it when dashboard loads
-loadProjectProgressForDonor();
+  // ---------- Boot ----------
+  donorName.textContent = user.name || "Donor";
+  donorEmail.textContent = user.email || "—";
 
+  (async function init() {
+    const history = loadHistory();
+    renderStats(history);
+    fillHistoryProjectFilter(history);
+    renderHistory(history);
 
+    historySearch.addEventListener("input", () => renderHistory(history));
+    historyProject.addEventListener("change", () => renderHistory(history));
+    historyStatus.addEventListener("change", () => renderHistory(history));
+    exportCsv.addEventListener("click", () => downloadCSV(getFilteredHistory(history)));
 
+    const projects = await loadProjects();
+    const favs = loadFavorites();
 
+    updateSuggestions(projects);
+    renderProjects(projects, favs);
+    wireFavoriteClicks(projects, favs);
 
-window.addEventListener("storage", (e) => {
-  if (e.key === "donorHistory") {
-    // reload the donor view whenever NGO updates donorHistory
-    renderDonorHistory(); 
-  }
-});
-
-setInterval(() => {
-  renderDonorHistory();
-}, 2000);
-
-renderDonorHistory();
+    projectSearch.addEventListener("input", () => renderProjects(projects, favs));
+    projectSort.addEventListener("change", () => renderProjects(projects, favs));
+    favOnly.addEventListener("change", () => renderProjects(projects, favs));
+  })();
+})();

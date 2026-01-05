@@ -1,136 +1,232 @@
-/* Project progress inside donor cards */
-.project-progress {
-    margin-top: 10px;
-    text-align: left;
-    font-size: 13px;
+:root{
+  --bg:#f6f7fb;
+  --card:#ffffff;
+  --text:#111827;
+  --muted:#6b7280;
+  --border:#e5e7eb;
+  --primary:#1656a2;
+  --primary-2:#0f3c74;
+  --good:#16a34a;
+  --warn:#f59e0b;
+  --bad:#ef4444;
+  --shadow:0 10px 28px rgba(0,0,0,.08);
+  --radius:16px;
 }
 
-.project-progress .progress {
-    height: 8px;
-    background: #eee;
-    border-radius: 6px;
-    overflow: hidden;
-    margin-top: 4px;
+:root[data-theme="dark"]{
+  --bg:#0b1220;
+  --card:#0f1a2e;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --border:#22314d;
+  --primary:#60a5fa;
+  --primary-2:#3b82f6;
+  --shadow:0 14px 40px rgba(0,0,0,.35);
 }
 
-.project-progress .progress span {
-    display: block;
-    height: 100%;
-    background: linear-gradient(90deg,#1656a2,#0f4176);
-}
-
-
-
+*{box-sizing:border-box}
 body{
-    font-family: Arial, sans-serif;
-    background: #f2f5f9;
-    margin: 0;
-    padding: 0;
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
 }
 
-.header{
-    background: #1656a2;
-    color: white;
-    padding: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+a{color:inherit}
+.container{
+  max-width:1100px;
+  margin:0 auto;
+  padding:20px;
 }
 
-.header button{
-    padding: 8px 15px;
-    background: white;
-    border: none;
-    cursor: pointer;
-    color: #1656a2;
-    font-weight: bold;
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:10;
+  background:rgba(246,247,251,.9);
+  backdrop-filter:saturate(140%) blur(10px);
+  border-bottom:1px solid var(--border);
+}
+:root[data-theme="dark"] .topbar{
+  background:rgba(11,18,32,.85);
+}
+.topbar-inner{
+  max-width:1100px;
+  margin:0 auto;
+  padding:14px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:800;
+  letter-spacing:.2px;
+}
+.brand-badge{
+  width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(135deg,var(--primary),var(--primary-2));
+  box-shadow:var(--shadow);
+}
+.top-actions{display:flex; gap:10px; align-items:center;}
+
+.btn{
+  border:1px solid var(--border);
+  background:var(--card);
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:600;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{
+  background:linear-gradient(135deg,var(--primary),var(--primary-2));
+  color:white;
+  border:none;
+}
+.btn-danger{
+  background:#b91c1c;
+  color:white;
+  border:none;
 }
 
-.profile-box{
-    background: white;
-    width: 90%;
-    margin: 15px auto;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0px 0px 5px #aaa;
+.grid{
+  display:grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap:16px;
+  margin-top:18px;
 }
 
-.history-table{
-    width: 90%;
-    margin: auto;
-    border-collapse: collapse;
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:16px;
 }
 
-.history-table th, .history-table td{
-    border: 1px solid #ccc;
-    padding: 10px;
-}
+.card h3{margin:0 0 10px 0; font-size:16px}
+.muted{color:var(--muted)}
 
-.project-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: center; /* Centers horizontally */
-    gap: 20px;               /* Space between cards */
-    flex-wrap: nowrap;       /* Prevents wrapping to next line */
-    margin-top: 20px;
+.stats{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap:12px;
 }
-
-.project-card {
-    width: 260px;
-    background: rgba(255, 255, 255, 0.29);
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    text-align: right;
+.stat{
+  padding:14px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.65));
 }
-
-
-.project-card img{
-    width:100%;
-    height:130px;
-    background:#ddd;
-    border-radius: 5px;
+:root[data-theme="dark"] .stat{
+  background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
 }
+.stat .k{font-size:12px; color:var(--muted); margin-bottom:6px}
+.stat .v{font-size:20px; font-weight:800}
 
-.donate-btn{
-    margin-top: 10px;
-    padding: 8px 15px;
-    background: #1656a2;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
+.controls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
 }
+.input, select{
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:var(--card);
+  color:var(--text);
+  min-width:200px;
+}
+.small{min-width:160px}
+.hr{height:1px; background:var(--border); margin:14px 0}
 
-.donate-btn:hover{
-    background:#0f4176;
+.table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  overflow:hidden;
+  border-radius:14px;
+  border:1px solid var(--border);
 }
-/* Status badges in donation history */
-.status-badge {
-    display: inline-block;
-    padding: 3px 8px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 600;
+.table th, .table td{
+  text-align:left;
+  padding:12px 10px;
+  border-bottom:1px solid var(--border);
+  font-size:14px;
 }
+.table th{color:var(--muted); font-weight:700; background:rgba(0,0,0,.02)}
+:root[data-theme="dark"] .table th{background:rgba(255,255,255,.03)}
+.table tr:last-child td{border-bottom:none}
 
-/* Colors for each status */
-.status-processing {
-    background: #fff7e6;
-    color: #b26b00;
+.project-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap:14px;
 }
-
-.status-received {
-    background: #e6f4ff;
-    color: #0b63b6;
+.project-card{
+  overflow:hidden;
+  padding:0;
 }
-
-.status-implementing {
-    background: #f3e6ff;
-    color: #6b2fb6;
+.project-img{
+  height:130px;
+  background:#e5e7eb;
+  background-size:cover;
+  background-position:center;
 }
+.project-body{padding:14px}
+.project-title{font-weight:800; margin:0 0 6px 0}
+.project-meta{font-size:12px; color:var(--muted); margin-bottom:10px}
+.progress-wrap{margin-top:10px}
+.progress-bar{
+  height:10px;
+  background:rgba(0,0,0,.08);
+  border-radius:999px;
+  overflow:hidden;
+  border:1px solid var(--border);
+}
+:root[data-theme="dark"] .progress-bar{background:rgba(255,255,255,.06)}
+.progress-bar > div{
+  height:100%;
+  width:0%;
+  background:linear-gradient(135deg,var(--good), #22c55e);
+}
+.badge{
+  display:inline-flex;
+  gap:6px;
+  align-items:center;
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid var(--border);
+}
+.badge.good{background:rgba(22,163,74,.12)}
+.badge.warn{background:rgba(245,158,11,.12)}
+.badge.bad{background:rgba(239,68,68,.12)}
 
-.status-completed {
-    background: #e6f7e9;
-    color: #1f7a34;
+.card-actions{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+}
+.fav-btn{
+  flex:1;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+.donate-btn{flex:1}
+
+@media (max-width: 900px){
+  .stats{grid-template-columns: repeat(2,1fr);}
+}
+@media (max-width: 560px){
+  .stats{grid-template-columns: 1fr;}
+  .input, select{min-width: 100%;}
 }
