@@ -5,34 +5,46 @@ require_once __DIR__ . "/auth_controller.php";
 require_once __DIR__ . "/project_model.php";
 
 AuthController::startSession();
+header("Content-Type: application/json; charset=utf-8");
 
-function json_out(array $p, int $code=200): void {
-  http_response_code($code);
-  header("Content-Type: application/json; charset=utf-8");
-  echo json_encode($p);
+$me = $_SESSION["user"] ?? null;
+if (!$me || ($me["role"] ?? "") !== "ngo") {
+  http_response_code(401);
+  echo json_encode(["success"=>false,"error"=>"Unauthorized"]);
   exit;
 }
 
-$u = $_SESSION["user"] ?? null;
-if (!$u) json_out(["success"=>false,"error"=>"Not logged in."], 401);
-if (($u["role"] ?? "") !== "ngo") json_out(["success"=>false,"error"=>"Forbidden."], 403);
-if (($u["status"] ?? "") !== "approved") json_out(["success"=>false,"error"=>"NGO not approved yet."], 403);
-
 $body = json_decode((string)file_get_contents("php://input"), true) ?: [];
 $csrf = (string)($body["csrf"] ?? "");
+$title = trim((string)($body["title"] ?? ""));
+$desc  = trim((string)($body["description"] ?? ""));
+$goal  = (int)($body["goal"] ?? 0);
 
-if (empty($_SESSION["csrf"]) || !hash_equals($_SESSION["csrf"], $csrf)) {
-  json_out(["success"=>false,"error"=>"Invalid CSRF token."], 400);
+// ✅ Proper CSRF check (no reflection)
+AuthController::verifyCsrf($csrf);
+
+if ($title === "" || $desc === "" || $goal <= 0) {
+  http_response_code(422);
+  echo json_encode(["success"=>false,"error"=>"Title, description and valid goal are required."]);
+  exit;
 }
 
-$title = trim((string)($body["title"] ?? ""));
-$desc = trim((string)($body["desc"] ?? ($body["description"] ?? "")));
+try {
+  $id = ProjectModel::create([
+    "ngo_id" => (int)$me["id"],
+    "title" => $title,
+    "description" => $desc,
+    "goal" => $goal,
+    "status" => "pending"
+  ]);
 
-$goal  = (float)($body["goal"] ?? 0);
+  echo json_encode(["success"=>true, "id"=>$id]);
+  exit;
 
-if ($title === "" || $desc === "") json_out(["success"=>false,"error"=>"Title/description required."], 422);
-if ($goal <= 0) json_out(["success"=>false,"error"=>"Goal must be > 0."], 422);
+} catch (Throwable $e) {
+  http_response_code(500);
+  echo json_encode(["success"=>false,"error"=>"Server error: ".$e->getMessage()]);
+  exit;
+}
 
-$projectId = ProjectModel::createPending((int)$u["id"], $title, $desc, $goal);
 
-json_out(["success"=>true, "project_id"=>$projectId]);

@@ -1,70 +1,55 @@
 <?php
 declare(strict_types=1);
+session_start();
 
-require_once __DIR__ . "/auth_controller.php";
-require_once __DIR__ . "/config_db.php";
+require_once __DIR__ . "/project_model.php";
 
-AuthController::startSession();
+header("Content-Type: application/json; charset=utf-8");
 
-// must be logged in
+function jsonOut(array $p, int $code = 200): void {
+  http_response_code($code);
+  echo json_encode($p);
+  exit;
+}
+
 if (!isset($_SESSION["user"])) {
-  http_response_code(401);
-  header("Content-Type: application/json");
-  echo json_encode(["success"=>false,"error"=>"Not logged in"]);
-  exit;
+  jsonOut(["success"=>false, "error"=>"Not logged in"], 401);
 }
 
-// must be NGO + approved
-$u = $_SESSION["user"];
-if (($u["role"] ?? "") !== "ngo") {
-  http_response_code(403);
-  header("Content-Type: application/json");
-  echo json_encode(["success"=>false,"error"=>"Only NGO can submit projects"]);
-  exit;
-}
-if (($u["status"] ?? "") !== "approved") {
-  http_response_code(403);
-  header("Content-Type: application/json");
-  echo json_encode(["success"=>false,"error"=>"NGO not approved"]);
-  exit;
+$user = $_SESSION["user"];
+if (($user["role"] ?? "") !== "ngo") {
+  jsonOut(["success"=>false, "error"=>"Only NGO can submit projects"], 403);
 }
 
-// read JSON
+if (($user["status"] ?? "") !== "approved") {
+  jsonOut(["success"=>false, "error"=>"NGO not approved"], 403);
+}
+
 $body = json_decode((string)file_get_contents("php://input"), true) ?: [];
 
-// CSRF check (same logic as AuthController)
 $token = (string)($body["csrf"] ?? "");
 if (empty($_SESSION["csrf"]) || !hash_equals($_SESSION["csrf"], $token)) {
-  http_response_code(400);
-  header("Content-Type: application/json");
-  echo json_encode(["success"=>false,"error"=>"Invalid CSRF token."]);
-  exit;
+  jsonOut(["success"=>false, "error"=>"Invalid CSRF token."], 400);
 }
 
 $title = trim((string)($body["title"] ?? ""));
-$desc  = trim((string)($body["desc"] ?? ""));
+$desc  = trim((string)($body["description"] ?? ""));
 $goal  = (int)($body["goal"] ?? 0);
 
 if ($title === "" || $desc === "" || $goal <= 0) {
-  http_response_code(422);
-  header("Content-Type: application/json");
-  echo json_encode(["success"=>false,"error"=>"Title/Description/Goal required"]);
-  exit;
+  jsonOut(["success"=>false, "error"=>"Title, description, and goal are required."], 422);
 }
 
-$pdo = db();
+try {
+  $projectId = ProjectModel::createPending([
+    "ngo_user_id" => (int)$user["id"],
+    "title" => $title,
+    "description" => $desc,
+    "goal" => $goal
+  ]);
 
-// Insert as pending (admin will approve)
-$stmt = $pdo->prepare("
-  INSERT INTO projects (ngo_user_id, title, description, goal_amount, raised_amount, status, created_at)
-  VALUES (:ngo_user_id, :title, :description, :goal_amount, 0, 'pending', NOW())
-");
-$stmt->execute([
-  ":ngo_user_id" => (int)$u["id"],
-  ":title" => $title,
-  ":description" => $desc,
-  ":goal_amount" => $goal
-]);
+  jsonOut(["success"=>true, "id"=>$projectId]);
+} catch (Throwable $e) {
+  jsonOut(["success"=>false, "error"=>"DB error: " . $e->getMessage()], 500);
+}
 
-header("Content-Type: application/json");
-echo json_encode(["success"=>true, "project_id" => (int)$pdo->lastInsertId()]);
