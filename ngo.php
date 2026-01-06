@@ -2,9 +2,11 @@
 declare(strict_types=1);
 session_start();
 
-if (empty($_SESSION["csrf"])) {
-  $_SESSION["csrf"] = bin2hex(random_bytes(16));
-}
+require_once __DIR__ . "/auth_controller.php";
+$csrf = AuthController::csrfToken();
+
+
+
 
 
 if (!isset($_SESSION['user'])) {
@@ -153,9 +155,13 @@ if (($user['status'] ?? '') !== 'approved') {
 
   </style>
 
-  <script>
-  window.PHP_CSRF = "<?= htmlspecialchars($_SESSION['csrf']) ?>";
+  <?php
+
+?>
+<script>
+  window.PHP_CSRF = "<?= htmlspecialchars($csrf) ?>";
 </script>
+
 
 </head>
 <body>

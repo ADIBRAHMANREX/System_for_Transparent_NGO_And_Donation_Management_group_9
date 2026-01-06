@@ -5,6 +5,26 @@ require_once __DIR__ . "/user_model.php";
 
 final class AuthController {
 
+
+public static function requireLogin(string $role = ""): void {
+  self::startSession();
+  if (empty($_SESSION["user"])) {
+    http_response_code(401);
+    header("Content-Type: application/json; charset=utf-8");
+    echo json_encode(["success"=>false, "error"=>"Not logged in"]);
+    exit;
+  }
+  if ($role !== "" && (($_SESSION["user"]["role"] ?? "") !== $role)) {
+    http_response_code(403);
+    header("Content-Type: application/json; charset=utf-8");
+    echo json_encode(["success"=>false, "error"=>"Forbidden"]);
+    exit;
+  }
+}
+
+
+
+
   public static function startSession(): void {
     if (session_status() === PHP_SESSION_NONE) {
       session_start();
@@ -122,4 +142,10 @@ final class AuthController {
     header("Location: login.php");
     exit;
   }
+
+
+  public static function verifyCsrf(string $token): void {
+  self::requireCsrf($token);
+}
+
 }
