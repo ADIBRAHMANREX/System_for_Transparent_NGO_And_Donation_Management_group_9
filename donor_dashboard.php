@@ -1,12 +1,20 @@
 <?php
 declare(strict_types=1);
-session_start();
 
-// Not logged in → index
-if (!isset($_SESSION["user"])) {
-  header("Location: index.html");
-  exit;
+
+require_once 'session_timeout.php';
+
+if (!isset($_SESSION['user'])) {
+    header("Location: index.html");
+    exit;
 }
+
+if (($_SESSION['user']['role'] ?? '') !== 'donor') {
+    header("Location: login.php");
+    exit;
+}
+
+
 $user = $_SESSION["user"];
 if (($user["role"] ?? "") !== "donor") {
   header("Location: index.html");
