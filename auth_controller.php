@@ -5,26 +5,6 @@ require_once __DIR__ . "/user_model.php";
 
 final class AuthController {
 
-
-public static function requireLogin(string $role = ""): void {
-  self::startSession();
-  if (empty($_SESSION["user"])) {
-    http_response_code(401);
-    header("Content-Type: application/json; charset=utf-8");
-    echo json_encode(["success"=>false, "error"=>"Not logged in"]);
-    exit;
-  }
-  if ($role !== "" && (($_SESSION["user"]["role"] ?? "") !== $role)) {
-    http_response_code(403);
-    header("Content-Type: application/json; charset=utf-8");
-    echo json_encode(["success"=>false, "error"=>"Forbidden"]);
-    exit;
-  }
-}
-
-
-
-
   public static function startSession(): void {
     if (session_status() === PHP_SESSION_NONE) {
       session_start();
@@ -39,18 +19,27 @@ public static function requireLogin(string $role = ""): void {
     return $_SESSION["csrf"];
   }
 
- private static function requireCsrf(string $token): void {
-  self::startSession();
-
-  // ✅ DEBUG (temporary)
-  //error_log("CSRF SESSION: " . ($_SESSION["csrf"] ?? "NONE"));
- // error_log("CSRF TOKEN: " . ($token ?: "EMPTY"));
-
-  if (empty($_SESSION["csrf"]) || !hash_equals($_SESSION["csrf"], $token)) {
-    self::json(["success" => false, "error" => "Invalid CSRF token."], 400);
+  private static function requireCsrf(string $token): void {
+    self::startSession();
+    if (empty($_SESSION["csrf"]) || !hash_equals($_SESSION["csrf"], $token)) {
+      self::json(["success" => false, "error" => "Invalid CSRF token."], 400);
+    }
   }
-}
 
+  // ✅ Public wrapper (ONLY ONCE)
+  public static function verifyCsrf(string $token): void {
+    self::requireCsrf($token);
+  }
+
+  public static function requireLogin(string $role = ""): void {
+    self::startSession();
+    if (empty($_SESSION["user"])) {
+      self::json(["success"=>false, "error"=>"Not logged in"], 401);
+    }
+    if ($role !== "" && (($_SESSION["user"]["role"] ?? "") !== $role)) {
+      self::json(["success"=>false, "error"=>"Forbidden"], 403);
+    }
+  }
 
   private static function json(array $payload, int $code = 200): void {
     http_response_code($code);
@@ -142,10 +131,6 @@ public static function requireLogin(string $role = ""): void {
     header("Location: login.php");
     exit;
   }
-
-
-  public static function verifyCsrf(string $token): void {
-  self::requireCsrf($token);
 }
 
-}
+

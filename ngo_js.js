@@ -182,44 +182,43 @@ if (form) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const payload = {
-      csrf: window.PHP_CSRF,
-      title: document.getElementById("projTitle").value.trim(),
-      description: document.getElementById("projDesc").value.trim(),
-      goal: Number(document.getElementById("projGoal").value),
-    };
+    const title = document.getElementById("projTitle").value.trim();
+    const description = document.getElementById("projDesc").value.trim();
+    const goal = Number(document.getElementById("projGoal").value);
 
-    if (!payload.title || !payload.description || !payload.goal || payload.goal <= 0) {
+    if (!title || !description || !goal || goal <= 0) {
       alert("Please fill all fields correctly.");
       return;
     }
 
-    try {
-      const res = await fetch("project_submit.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+    const payload = {
+      csrf: window.PHP_CSRF,
+      title: title,
+      description: description, // ✅ MUST be "description"
+      goal: goal
+    };
 
-      const data = await res.json();
+    const res = await fetch("project_submit.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
-      if (!data.success) {
-        alert(data.error || "Project submit failed");
-        return;
-      }
+    const data = await res.json();
 
-      document.getElementById("projSubmitMsg").style.display = "block";
-      form.reset();
-
-      // Optional: you can reload NGO page
-      // location.reload();
-
-    } catch (err) {
-      console.error(err);
-      alert("Submit failed: backend did not return JSON. Check Network tab.");
+    if (!data.success) {
+      alert(data.error || "Project submit failed.");
+      return;
     }
+
+    document.getElementById("projSubmitMsg").style.display = "block";
+    form.reset();
+
+    // optional: show success
+    // alert("Submitted! Admin can approve it from admin_projects.php");
   });
 }
+
 
 
 

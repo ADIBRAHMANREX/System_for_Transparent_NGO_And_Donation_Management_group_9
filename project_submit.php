@@ -15,12 +15,12 @@ if (!$me || ($me["role"] ?? "") !== "ngo") {
 }
 
 $body = json_decode((string)file_get_contents("php://input"), true) ?: [];
+
 $csrf = (string)($body["csrf"] ?? "");
 $title = trim((string)($body["title"] ?? ""));
-$desc  = trim((string)($body["description"] ?? ""));
-$goal  = (int)($body["goal"] ?? 0);
+$desc  = trim((string)($body["description"] ?? "")); // ✅ expects "description"
+$goal  = (float)($body["goal"] ?? 0);
 
-// ✅ Proper CSRF check (no reflection)
 AuthController::verifyCsrf($csrf);
 
 if ($title === "" || $desc === "" || $goal <= 0) {
@@ -30,14 +30,7 @@ if ($title === "" || $desc === "" || $goal <= 0) {
 }
 
 try {
-  $id = ProjectModel::create([
-    "ngo_id" => (int)$me["id"],
-    "title" => $title,
-    "description" => $desc,
-    "goal" => $goal,
-    "status" => "pending"
-  ]);
-
+  $id = ProjectModel::createPending((int)$me["id"], $title, $desc, $goal);
   echo json_encode(["success"=>true, "id"=>$id]);
   exit;
 
@@ -46,5 +39,6 @@ try {
   echo json_encode(["success"=>false,"error"=>"Server error: ".$e->getMessage()]);
   exit;
 }
+
 
 
