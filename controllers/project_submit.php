@@ -1,8 +1,9 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . "/../models/project_model.php";
 require_once __DIR__ . "/auth_controller.php";
-require_once __DIR__ . "/project_model.php";
+
 
 AuthController::startSession();
 header("Content-Type: application/json; charset=utf-8");

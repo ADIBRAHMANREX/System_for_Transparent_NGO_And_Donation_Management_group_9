@@ -2,7 +2,9 @@
 declare(strict_types=1);
 session_start();
 
-require_once __DIR__ . "/auth_controller.php";
+require_once __DIR__ . "/../controllers/auth_controller.php";
+require_once __DIR__ . "/../controllers/auth_guard.php";
+
 $csrf = AuthController::csrfToken();
 
 
@@ -36,7 +38,8 @@ if (($user['status'] ?? '') !== 'approved') {
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Believe - NGO Dashboard</title>
-  <link rel="stylesheet" href="style.css"/>
+ <link rel="stylesheet" href="../public/assets/css/style.css">
+
   <style>
   
   .dash { max-width:1100px; margin:20px auto; padding:0 18px; }
@@ -268,7 +271,8 @@ if (($user['status'] ?? '') !== 'approved') {
 <script>
   window.PHP_SESSION_USER = <?= json_encode($_SESSION['user'], JSON_UNESCAPED_UNICODE) ?>;
 </script>
-<script src="ngo_js.js"></script>
+<script src="../public/assets/js/ngo_js.js"></script>
+
 
 </body>
 </html>
