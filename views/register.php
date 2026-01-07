@@ -1,5 +1,7 @@
 <?php
-require_once __DIR__ . "/auth_controller.php";
+require_once __DIR__ . "/../controllers/auth_controller.php";
+require_once __DIR__ . "/../controllers/auth_guard.php";
+
 $csrf = AuthController::csrfToken();
 ?>
 <!doctype html>

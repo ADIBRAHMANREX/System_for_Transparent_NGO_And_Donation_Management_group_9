@@ -6,7 +6,7 @@ require_once __DIR__ . "/project_model.php";
 
 AuthController::startSession();
 
-// Only admin allowed
+// Only admin allowedjj
 if (!isset($_SESSION["user"]) || $_SESSION["user"]["role"] !== "admin") {
   http_response_code(403);
   echo json_encode(["success"=>false,"error"=>"Unauthorized"]);
