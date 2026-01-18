@@ -1,0 +1,12 @@
+RewriteEngine On
+
+# Base path (VERY IMPORTANT for your project folder)
+RewriteBase /webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_group_10/public/
+
+# If the file or directory exists, serve it directly
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Otherwise send everything to index.php
+RewriteRule ^ index.php [L]

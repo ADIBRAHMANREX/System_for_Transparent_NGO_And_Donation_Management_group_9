@@ -1,7 +1,8 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . "/user_model.php";
+require_once __DIR__ . "/../models/user_model.php";
+
 
 final class AuthController {
 

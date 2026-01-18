@@ -33,7 +33,8 @@ $csrf = AuthController::csrfToken();
   <input type="password" id="password">
 
   <button class="btn" id="loginBtn" type="button">Login</button>
-  <a class="btn2" href="register.php">Create account</a>
+  <a class="btn2" href="register">Create account</a>
+
 
   <input type="hidden" id="csrf" value="<?= htmlspecialchars($csrf) ?>">
 </main>
@@ -51,12 +52,12 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     password: document.getElementById("password").value
   };
 
-  const res = await fetch("auth_login.php", {
+  const res = await fetch("api/auth/login", {
   method: "POST",
   headers: {"Content-Type":"application/json"},
-  credentials: "same-origin",
   body: JSON.stringify(payload)
 });
+
 
 
   const data = await res.json();

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . "/config_db.php";
+require_once __DIR__ . "/../models/config_db.php";
 
 final class ProjectModel {
 
