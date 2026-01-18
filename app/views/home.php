@@ -15,14 +15,14 @@
 
     <nav class="main-nav">
       <ul>
-        <li><a href="index.html">Home</a></li>
+        <li><a href="home.php">Home</a></li>
         <li><a href="about.html">About</a></li>
         <li><a href="projects.html">Our Projects</a></li>
         <li><a href="donation.html">Donate</a></li>
 
         <li><a href="careers.html">Careers</a></li>
         <li><a href="contact.html">Contact</a></li>
-        <li><a id="login-link" href="login.php"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Login</a></li>
+        <li><a id="login-link" href="login"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Login</a></li>
       </ul>
     </nav>
   </header>

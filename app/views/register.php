@@ -62,7 +62,7 @@ $csrf = AuthController::csrfToken();
   </div>
 
   <button class="btn hidden" id="registerBtn" type="button">Register</button>
-  <a class="btn2" href="login.php">Back to Login</a>
+  <a class="btn2" href="login">Back to Login</a>
 
   <input type="hidden" id="csrf" value="<?= htmlspecialchars($csrf) ?>">
 </main>
@@ -127,7 +127,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return showErr("NGO name and license are required.");
   }
 
-  const res = await fetch("auth_register.php", {
+  const res = await fetch("api/auth/register", {
   method: "POST",
   headers: {"Content-Type":"application/json"},
   credentials: "same-origin",
