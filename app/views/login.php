@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . "/../controllers/auth_controller.php";
-require_once __DIR__ . "/../controllers/auth_guard.php";
 
 $csrf = AuthController::csrfToken();
 ?>
@@ -27,12 +26,14 @@ $csrf = AuthController::csrfToken();
   <div class="err" id="errBox"></div>
 
   <label>Email</label>
-  <input type="email" id="email">
+  <input type="email" id="email" autocomplete="username">
 
   <label>Password</label>
-  <input type="password" id="password">
+  <input type="password" id="password" autocomplete="current-password">
 
   <button class="btn" id="loginBtn" type="button">Login</button>
+
+  <!-- ✅ MVC link -->
   <a class="btn2" href="register">Create account</a>
 
 
@@ -44,37 +45,51 @@ const errBox = document.getElementById("errBox");
 function showErr(m){ errBox.style.display="block"; errBox.textContent=m; }
 function clearErr(){ errBox.style.display="none"; errBox.textContent=""; }
 
+// ✅ set your base once
+const BASE = "/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_group_10/public";
+
 document.getElementById("loginBtn").addEventListener("click", async () => {
   clearErr();
+
   const payload = {
     csrf: document.getElementById("csrf").value,
     email: document.getElementById("email").value.trim(),
     password: document.getElementById("password").value
   };
 
-  const res = await fetch("api/auth/login", {
-  method: "POST",
-  headers: {"Content-Type":"application/json"},
-  body: JSON.stringify(payload)
-});
+  try {
+    const res = await fetch(BASE + "/api/auth/login", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
 
+    // ✅ if route returns HTML/404, show useful error
+    const ct = res.headers.get("content-type") || "";
+    if (!ct.includes("application/json")) {
+      const text = await res.text();
+      return showErr("Login route returned non-JSON (likely 404). Check /api/auth/login in index.php.");
+    }
 
+    const data = await res.json();
+    if (!data.success) return showErr(data.error || "Login failed.");
 
-  const data = await res.json();
-  if(!data.success) return showErr(data.error || "Login failed.");
+    const u = data.user;
+    if (u.role === "admin") return window.location.href = BASE + "/admin";
+    if (u.role === "ngo") {
+      if (u.status !== "approved") return window.location.href = BASE + "/ngo/pending";
+      return window.location.href = BASE + "/ngo";
+    }
+    return window.location.href = BASE + "/donor";
 
-  const u = data.user;
-
-  if(u.role === "admin") return window.location.href = "admin_dashboard.php";
-
-  if(u.role === "ngo"){
-    if(u.status !== "approved") return window.location.href = "ngo_pending.php";
-    return window.location.href = "ngo.php";
+  } catch (e) {
+    console.error(e);
+    showErr("Login failed (network/route error). Check /api/auth/login route.");
   }
-
-  return window.location.href = "donor_dashboard.php";
 });
 </script>
+
 </body>
 </html>
+
 
