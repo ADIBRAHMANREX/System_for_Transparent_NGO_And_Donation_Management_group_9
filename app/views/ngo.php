@@ -172,7 +172,7 @@ if (($user['status'] ?? '') !== 'approved') {
   <header class="head">
   <a href="index.html" class="brand">Believe</a>
 
-  <a href="logout.php" class="logout-btn" style="text-decoration:none;display:inline-block;">
+  <a  class="logout-btn" style="text-decoration:none;display:inline-block;"  href="/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_group_10/public/logout"  >
   Logout
 </a>
 
