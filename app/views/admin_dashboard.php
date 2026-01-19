@@ -37,7 +37,8 @@ if (!$user || ($user["role"] ?? "") !== "admin") {
 <div class="wrap">
   <div class="top">
     <h2>NGO Approvals</h2>
-    <a class="btn secondary" href="logout">Logout</a>
+    <a class="btn secondary" href="/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_group_10/public/logout"
+>Logout</a>
   </div>
 
   <a href="admin/projects">Approve Projects</a>
