@@ -6,6 +6,26 @@ require_once __DIR__ . "/../models/user_model.php";
 
 final class AuthController {
 
+
+
+public static function adminDashboard(): void {
+    self::startSession();
+
+    $me = $_SESSION["user"] ?? null;
+    if (!$me || ($me["role"] ?? "") !== "admin") {
+        header("Location: login");
+        exit;
+    }
+
+    $ngos = UserModel::listNGOs();
+
+    view("admin_dashboard", [
+        "ngos" => $ngos
+    ]);
+}
+
+
+
   public static function startSession(): void {
     if (session_status() === PHP_SESSION_NONE) {
       session_start();
