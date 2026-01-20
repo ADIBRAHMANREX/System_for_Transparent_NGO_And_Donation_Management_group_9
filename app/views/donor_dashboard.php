@@ -2,7 +2,11 @@
 declare(strict_types=1);
 
 
-require_once 'session_timeout.php';
+
+require_once __DIR__ . "/../controllers/auth_guard.php";
+$me = require_login("donor"); // blocks if not logged in as donor
+
+
 
 if (!isset($_SESSION['user'])) {
     header("Location: index.html");
