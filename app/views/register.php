@@ -145,7 +145,10 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   } else {
     alert("Account created! Please login.");
   }
-  window.location.href = "login.php";
+window.location.href = "/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_group_10/public/login";
+
+
+
 });
 </script>
 </body>
