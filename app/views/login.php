@@ -1,7 +1,8 @@
 <?php
 require_once __DIR__ . "/../controllers/auth_controller.php";
-
 $csrf = AuthController::csrfToken();
+
+$BASE = "/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_group_10/public";
 ?>
 <!doctype html>
 <html lang="en">
