@@ -1,7 +1,8 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . "/auth_guard.php";
-require_once __DIR__ . "/auth_controller.php";
+require_once __DIR__ . "/../controllers/auth_guard.php";
+
+require_once __DIR__ . "/../controllers/auth_controller.php";
 
 $me = require_login("admin");
 $csrf = AuthController::csrfToken();
@@ -31,8 +32,9 @@ $csrf = AuthController::csrfToken();
   <div class="top">
     <h2>Project Requests</h2>
     <div>
-      <a class="btn secondary" href="admin_dashboard.php" style="text-decoration:none;display:inline-block;">NGO Approvals</a>
-      <a class="btn secondary" href="logout.php" style="text-decoration:none;display:inline-block;">Logout</a>
+      <a class="btn secondary"  href="admin" style="text-decoration:none;display:inline-block;">NGO Approvals</a>
+      <a class="btn secondary" href="/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_group_10/public/logout"
+>Logout</a>
     </div>
   </div>
 

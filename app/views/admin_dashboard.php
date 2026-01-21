@@ -43,7 +43,7 @@ if (!$user || ($user["role"] ?? "") !== "admin") {
 >Logout</a>
   </div>
 
-  <a href="admin/projects">Approve Projects</a>
+    <a class="btn secondary"  href="admin/projects" style="text-decoration:none;display:inline-block;">NGO  PROJECT Approvals</a>
 
   <table>
     <thead>
