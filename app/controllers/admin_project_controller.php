@@ -6,7 +6,6 @@ require_once __DIR__ . "/project_model.php";
 
 AuthController::startSession();
 
-// Only admin allowedjj
 if (!isset($_SESSION["user"]) || $_SESSION["user"]["role"] !== "admin") {
   http_response_code(403);
   echo json_encode(["success"=>false,"error"=>"Unauthorized"]);
@@ -15,14 +14,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"]["role"] !== "admin") {
 
 $method = $_SERVER["REQUEST_METHOD"];
 
-// GET → fetch pending projects
 if ($method === "GET") {
   $projects = ProjectModel::pending();
   echo json_encode(["success"=>true,"projects"=>$projects]);
   exit;
 }
 
-// POST → approve project
+
 if ($method === "POST") {
   $body = json_decode(file_get_contents("php://input"), true) ?? [];
 

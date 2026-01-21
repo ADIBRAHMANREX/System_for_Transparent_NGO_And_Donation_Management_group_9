@@ -1,8 +1,7 @@
 <?php
 require_once __DIR__ . "/../controllers/auth_controller.php";
-$csrf = AuthController::csrfToken();
 
-$BASE = "/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_group_10/public";
+$csrf = AuthController::csrfToken();
 ?>
 <!doctype html>
 <html lang="en">
@@ -34,7 +33,6 @@ $BASE = "/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_
 
   <button class="btn" id="loginBtn" type="button">Login</button>
 
-  <!-- ✅ MVC link -->
   <a class="btn2" href="register">Create account</a>
 
 
@@ -46,7 +44,7 @@ const errBox = document.getElementById("errBox");
 function showErr(m){ errBox.style.display="block"; errBox.textContent=m; }
 function clearErr(){ errBox.style.display="none"; errBox.textContent=""; }
 
-// ✅ set your base once
+
 const BASE = "/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_group_10/public";
 
 document.getElementById("loginBtn").addEventListener("click", async () => {
@@ -65,7 +63,6 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
       body: JSON.stringify(payload)
     });
 
-    // ✅ if route returns HTML/404, show useful error
     const ct = res.headers.get("content-type") || "";
     if (!ct.includes("application/json")) {
       const text = await res.text();

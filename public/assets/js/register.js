@@ -113,7 +113,6 @@ $("submitBtn").addEventListener("click", async () => {
 
   if(data.user.role === "ngo" && data.user.status === "pending"){
     alert("NGO registered. Waiting for admin approval.");
-    // change this if your pending page has a different name
     window.location.href = "ngo_pending.html";
   } else {
     alert("Account created. Please login.");

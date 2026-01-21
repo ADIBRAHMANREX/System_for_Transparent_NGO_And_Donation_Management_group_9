@@ -1,7 +1,5 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+session_start();
 
 $user = $_SESSION["user"] ?? null;
 
@@ -9,8 +7,6 @@ if (!$user || ($user["role"] ?? "") !== "admin") {
     header("Location: login");
     exit;
 }
-
-/** @var array $ngos */
 ?>
 <!doctype html>
 <html lang="en">

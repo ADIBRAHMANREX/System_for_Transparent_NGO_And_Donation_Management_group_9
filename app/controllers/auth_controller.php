@@ -8,8 +8,6 @@ final class AuthController {
 
 
 
-
-
 public static function adminDashboard(): void {
     self::startSession();
 
@@ -49,7 +47,6 @@ public static function adminDashboard(): void {
     }
   }
 
-  // ✅ Public wrapper (ONLY ONCE)
   public static function verifyCsrf(string $token): void {
     self::requireCsrf($token);
   }

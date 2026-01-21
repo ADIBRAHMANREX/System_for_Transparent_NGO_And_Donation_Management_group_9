@@ -65,17 +65,17 @@ if (($user['status'] ?? '') !== 'approved') {
     .ngo-projects { list-style:disc; margin-left:20px; margin-top:6px; }
     .ngo-projects li { margin-bottom:4px; }
 
-   /* Header layout */
+   
 .head {
     display: flex;
-    justify-content: space-between; /* brand left, logout right */
+    justify-content: space-between; 
     align-items: center;
     padding: 12px 25px;
     background: #ffffff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Brand name */
+
 .brand {
     font-size: 26px;
     font-weight: bold;
@@ -83,7 +83,7 @@ if (($user['status'] ?? '') !== 'approved') {
     text-decoration: none;
 }
 
-/* Logout button */
+
 .logout-btn {
     background: #1656a2;
     color: white;
@@ -99,7 +99,7 @@ if (($user['status'] ?? '') !== 'approved') {
     background: #0e3e76;
 }
 
-/* Status badge (same idea as donor side) */
+
 .status-badge {
     display: inline-block;
     padding: 3px 8px;
@@ -108,7 +108,7 @@ if (($user['status'] ?? '') !== 'approved') {
     font-weight: 600;
 }
 
-/* Colors for each status */
+
 .status-processing {
     background: #fff7e6;
     color: #b26b00;
@@ -139,7 +139,7 @@ if (($user['status'] ?? '') !== 'approved') {
     color: #b21f1f;
 }
 
-/* Small action button inside the table */
+
 .status-action-btn {
     padding: 4px 10px;
     font-size: 12px;
@@ -181,7 +181,7 @@ if (($user['status'] ?? '') !== 'approved') {
     <main class="dash">
     <h2>NGO Dashboard</h2>
 
-    <!-- NGO summary + compliance -->
+    
     <div class="card">
       <h3 id="ngo-name"><?= htmlspecialchars($user['name']) ?></h3>
 
@@ -191,7 +191,7 @@ if (($user['status'] ?? '') !== 'approved') {
       </p>
     </div>
 
-    <!-- Incoming donations for this NGO -->
+    
     <div class="card">
   <h3>Incoming Donations (demo)</h3>
   <table class="ngo-table">
@@ -211,8 +211,7 @@ if (($user['status'] ?? '') !== 'approved') {
 </div>
 
 
-    <!-- Active projects for this NGO -->
-    <div class="card">
+   
   <h3>Active Projects</h3>
   <ul id="ngo-projects-list" class="ngo-projects">
     <li>Loading...</li>
@@ -242,7 +241,7 @@ if (($user['status'] ?? '') !== 'approved') {
 </div>
 
 
-<!-- NGO Project Submission Section -->
+
 <div class="card" id="projectSubmissionCard" style="margin-top:20px;">
   <h3>Submit New Project</h3>
 

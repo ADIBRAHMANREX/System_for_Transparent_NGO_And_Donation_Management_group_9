@@ -1,6 +1,4 @@
-// ===== NGO Dashboard JS (single submit listener + DB submit) =====
 
-// 1) Get logged-in NGO from PHP session
 const session = window.PHP_SESSION_USER || null;
 
 const ngoNameEl = document.getElementById("ngo-name");
@@ -25,7 +23,7 @@ if (!ngoName) {
 }
 
 async function loadNgoDashboard() {
-  // Demo: projects.xml mapping
+  
   const projectOwnerByTitle = {};
   let hasVerifiedProject = false;
 
@@ -69,7 +67,6 @@ async function loadNgoDashboard() {
     if (ngoStatusEl) ngoStatusEl.textContent = "Unverified";
   }
 
-  // Demo: incoming donations from localStorage
   if (!donationsBody) return;
 
   const allDonations = JSON.parse(localStorage.getItem("donorHistory") || "[]");
@@ -166,17 +163,16 @@ async function loadNgoDashboard() {
   });
 }
 
-// Logout (if exists)
 const logoutBtn = document.getElementById("logoutBtn");
 if (logoutBtn) logoutBtn.onclick = () => (window.location.href = "logout.php");
 
-// Hide submission card if NGO not approved
+
 const submitCard = document.getElementById("projectSubmissionCard");
 if (submitCard && (!session || session.status !== "approved")) {
   submitCard.style.display = "none";
 }
 
-// ✅ ONE submit listener ONLY: MySQL submit with CSRF
+
 const form = document.getElementById("projectSubmissionForm");
 if (form) {
   form.addEventListener("submit", async (e) => {
@@ -194,7 +190,7 @@ if (form) {
     const payload = {
       csrf: window.PHP_CSRF,
       title: title,
-      description: description, // ✅ MUST be "description"
+      description: description, 
       goal: goal
     };
 
@@ -213,9 +209,6 @@ if (form) {
 
     document.getElementById("projSubmitMsg").style.display = "block";
     form.reset();
-
-    // optional: show success
-    // alert("Submitted! Admin can approve it from admin_projects.php");
   });
 }
 

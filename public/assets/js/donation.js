@@ -1,11 +1,10 @@
 
 
-// Get project name from URL query
 const urlParams = new URLSearchParams(window.location.search);
 const project = urlParams.get('proj');
 document.getElementById('projectName').innerText = project;
 
-// Confirm donation
+
 
 document.getElementById('confirmBtn').onclick = ()=> {
   const amount = document.getElementById('amountInput').value;
@@ -38,7 +37,6 @@ document.getElementById('confirmBtn').onclick = ()=> {
 
    
 
-// Back to dashboard
 document.getElementById('backBtn').onclick = ()=>{
     window.location.href="donor_dashboard.html";
 };
