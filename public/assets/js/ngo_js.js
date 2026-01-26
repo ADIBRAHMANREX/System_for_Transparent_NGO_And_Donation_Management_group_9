@@ -1,3 +1,8 @@
+// ===== NGO Dashboard JS (NO projects.xml + single submit listener + MVC + MySQL) =====
+
+const APP_BASE = (window.APP_BASE && String(window.APP_BASE).trim() !== "")
+  ? String(window.APP_BASE).trim()
+  : "";
 
 const session = window.PHP_SESSION_USER || null;
 
@@ -8,20 +13,24 @@ const donationsBody = document.getElementById("ngo-donations-body");
 
 const ngoName = (session && session.role === "ngo") ? session.name : null;
 
-if (ngoName) {
-  ngoNameEl.textContent = ngoName;
-} else {
-  ngoNameEl.textContent = "NGO (not logged in)";
-  if (projectsList) projectsList.innerHTML = "<li>Please login as an NGO account to see your projects.</li>";
-  if (donationsBody) donationsBody.innerHTML = "<tr><td colspan='5'>Please login as an NGO account to see incoming donations.</td></tr>";
-}
+// --------------------
+// Header info
+// --------------------
+if (ngoNameEl) ngoNameEl.textContent = ngoName ? ngoName : "NGO (not logged in)";
 
 if (!ngoName) {
+  if (projectsList) projectsList.innerHTML = "<li>Please login as an NGO account to see your projects.</li>";
+  if (donationsBody) donationsBody.innerHTML = "<tr><td colspan='5'>Please login as an NGO account to see incoming donations.</td></tr>";
   if (ngoStatusEl) ngoStatusEl.textContent = "Unverified";
 } else {
-  loadNgoDashboard();
+  // since XML is removed, just show approved/unapproved from session
+  if (ngoStatusEl) ngoStatusEl.textContent = (session.status === "approved") ? "Approved" : "Pending approval";
 }
 
+// --------------------
+// Demo donations (optional - uses localStorage)
+// --------------------
+(function renderDemoDonations() {
 async function loadNgoDashboard() {
   
   const projectOwnerByTitle = {};
@@ -68,26 +77,19 @@ async function loadNgoDashboard() {
   }
 
   if (!donationsBody) return;
+  if (!ngoName) return;
 
   const allDonations = JSON.parse(localStorage.getItem("donorHistory") || "[]");
   donationsBody.innerHTML = "";
 
-  const STATUS_FLOW = ["processing", "received", "implementing", "completed", "reported"];
-
-  const incomingForThisNgo = allDonations
-    .map((d, idx) => ({ ...d, _idx: idx }))
-    .filter((d) => {
-      const owner = projectOwnerByTitle[d.project];
-      if (!owner || !ngoName) return false;
-      return owner.toLowerCase().startsWith(ngoName.toLowerCase());
-    });
-
-  if (incomingForThisNgo.length === 0) {
-    donationsBody.innerHTML = "<tr><td colspan='5'>No donations for this NGO yet (demo).</td></tr>";
+  if (allDonations.length === 0) {
+    donationsBody.innerHTML = "<tr><td colspan='5'>No donations yet (demo).</td></tr>";
     return;
   }
 
-  incomingForThisNgo.forEach((d) => {
+  const STATUS_FLOW = ["processing", "received", "implementing", "completed", "reported"];
+
+  allDonations.forEach((d, idx) => {
     const tr = document.createElement("tr");
 
     const tdProject = document.createElement("td");
@@ -98,37 +100,24 @@ async function loadNgoDashboard() {
 
     tdProject.textContent = d.project || "";
     tdDate.textContent = d.date || "";
-    tdAmount.textContent = "৳" + Number(d.amount).toLocaleString();
+    tdAmount.textContent = "৳" + Number(d.amount || 0).toLocaleString();
 
     const statusSpan = document.createElement("span");
     const statusValue = (d.status || "processing").toLowerCase();
     statusSpan.classList.add("status-badge");
 
-    switch (statusValue) {
-      case "received":
-        statusSpan.classList.add("status-received");
-        statusSpan.textContent = "Received";
-        break;
-      case "implementing":
-        statusSpan.classList.add("status-implementing");
-        statusSpan.textContent = "In Implementation";
-        break;
-      case "completed":
-        statusSpan.classList.add("status-completed");
-        statusSpan.textContent = "Completed";
-        break;
-      case "reported":
-        statusSpan.classList.add("status-reported");
-        statusSpan.textContent = "Reported";
-        break;
-      case "flagged":
-        statusSpan.classList.add("status-flagged");
-        statusSpan.textContent = "Flagged / On Hold";
-        break;
-      default:
-        statusSpan.classList.add("status-processing");
-        statusSpan.textContent = "Processing";
-    }
+    const labelMap = {
+      processing: ["status-processing", "Processing"],
+      received: ["status-received", "Received"],
+      implementing: ["status-implementing", "In Implementation"],
+      completed: ["status-completed", "Completed"],
+      reported: ["status-reported", "Reported"],
+      flagged: ["status-flagged", "Flagged / On Hold"]
+    };
+
+    const chosen = labelMap[statusValue] || labelMap.processing;
+    statusSpan.classList.add(chosen[0]);
+    statusSpan.textContent = chosen[1];
 
     tdStatus.appendChild(statusSpan);
 
@@ -137,7 +126,7 @@ async function loadNgoDashboard() {
     actionBtn.className = "status-action-btn";
     actionBtn.onclick = () => {
       const all = JSON.parse(localStorage.getItem("donorHistory") || "[]");
-      const rec = all[d._idx];
+      const rec = all[idx];
       if (!rec) return;
 
       const current = (rec.status || "processing").toLowerCase();
@@ -145,10 +134,9 @@ async function loadNgoDashboard() {
       const nextStatus = STATUS_FLOW[Math.min(STATUS_FLOW.length - 1, pos + 1)];
 
       rec.status = nextStatus;
-      all[d._idx] = rec;
+      all[idx] = rec;
       localStorage.setItem("donorHistory", JSON.stringify(all));
-
-      loadNgoDashboard();
+      location.reload();
     };
 
     tdAction.appendChild(actionBtn);
@@ -161,16 +149,34 @@ async function loadNgoDashboard() {
 
     donationsBody.appendChild(tr);
   });
-}
+})();
 
+// --------------------
+// Logout (MVC route)
+// --------------------
 const logoutBtn = document.getElementById("logoutBtn");
-if (logoutBtn) logoutBtn.onclick = () => (window.location.href = "logout.php");
+if (logoutBtn) logoutBtn.onclick = () => (window.location.href = `${APP_BASE}/logout`);
 
+// --------------------
+// Hide submission card if NGO not approved
+// --------------------
 
 const submitCard = document.getElementById("projectSubmissionCard");
 if (submitCard && (!session || session.status !== "approved")) {
   submitCard.style.display = "none";
 }
+
+// --------------------
+// Submit Project (MVC + MySQL) - SINGLE listener
+// --------------------
+(function attachSubmit() {
+  const form = document.getElementById("projectSubmissionForm");
+  const msg = document.getElementById("projSubmitMsg");
+
+  if (!form) return;
+
+  if (form.dataset.bound === "1") return;
+  form.dataset.bound = "1";
 
 
 const form = document.getElementById("projectSubmissionForm");
@@ -178,15 +184,38 @@ if (form) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const title = document.getElementById("projTitle").value.trim();
-    const description = document.getElementById("projDesc").value.trim();
-    const goal = Number(document.getElementById("projGoal").value);
+    const title = document.getElementById("projTitle")?.value.trim() || "";
+    const description = document.getElementById("projDesc")?.value.trim() || "";
+    const goal = Number(document.getElementById("projGoal")?.value || 0);
 
-    if (!title || !description || !goal || goal <= 0) {
+    if (!title || !description || goal <= 0) {
       alert("Please fill all fields correctly.");
       return;
     }
 
+    if (!window.PHP_CSRF) {
+      alert("CSRF missing. Reload the page.");
+      return;
+    }
+
+    const payload = { csrf: window.PHP_CSRF, title, description, goal };
+
+    try {
+      const res = await fetch(`${APP_BASE}/api/ngo/project/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        console.error("Non-JSON response:", text);
+        alert("Server returned non-JSON (PHP error). Check XAMPP Apache logs.");
+        return;
+      }
     const payload = {
       csrf: window.PHP_CSRF,
       title: title,
@@ -194,18 +223,22 @@ if (form) {
       goal: goal
     };
 
-    const res = await fetch("project_submit.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+      if (!data.success) {
+        alert(data.error || "Project submit failed.");
+        return;
+      }
 
-    const data = await res.json();
+      if (msg) msg.style.display = "block";
+      form.reset();
+      setTimeout(() => { if (msg) msg.style.display = "none"; }, 3000);
 
-    if (!data.success) {
-      alert(data.error || "Project submit failed.");
-      return;
+    } catch (err) {
+      console.error(err);
+      alert("Network/server error. Check Console + Network tab.");
     }
+  });
+})();
+
 
     document.getElementById("projSubmitMsg").style.display = "block";
     form.reset();

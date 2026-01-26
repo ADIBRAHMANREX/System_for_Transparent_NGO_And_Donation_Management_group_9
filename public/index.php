@@ -49,6 +49,16 @@ if ($path === "/api/admin/project/action") {
   exit;
 }
 
+// Direct access to project_submit.php page
+if ($path === "/project_submit") {
+  require_once __DIR__ . "/../app/views/project_submit.php";
+  exit;
+}
+
+
+// --------------------
+// PAGE routes (views)
+// --------------------
 
 if ($path === "/" || $path === "/home") { view("home"); exit; }
 

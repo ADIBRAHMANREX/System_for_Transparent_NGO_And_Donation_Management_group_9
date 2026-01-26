@@ -13,7 +13,7 @@ $_SESSION['user'] = [
 
 // Not logged in → login
 if (!isset($_SESSION['user'])) {
-  header("Location: login.php");
+  header("Location: login");
   exit;
 }
 
@@ -27,7 +27,7 @@ if ($user['role'] !== 'ngo') {
 
 // If NGO already approved → dashboard
 if ($user['status'] === 'approved') {
-  header("Location: ngo.html");
+  header("Location: ngo");
   exit;
 }
 ?>
@@ -72,7 +72,7 @@ if ($user['status'] === 'approved') {
 
 <body>
 <header class="top-bar">
-  <a href="index.html" class="brand">Believe</a>
+  <a href="/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_group_10/public" class="brand">Believe</a>
 </header>
 
 <main class="pending-wrap">
@@ -97,7 +97,8 @@ if ($user['status'] === 'approved') {
   </ul>
 
   <form method="post" action="logout.php">
-    <button class="btn" type="submit">Logout</button>
+    <a class="btn secondary" href="/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_group_10/public/logout"
+>Logout</a>
   </form>
 </main>
 

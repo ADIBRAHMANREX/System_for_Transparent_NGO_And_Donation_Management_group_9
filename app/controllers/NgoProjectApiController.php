@@ -18,12 +18,11 @@ final class NgoProjectApiController {
     }
 
     $body = json_decode((string)file_get_contents("php://input"), true) ?: [];
-    $csrf = (string)($body["csrf"] ?? "");
-    AuthController::verifyCsrf($csrf);
+    AuthController::verifyCsrf((string)($body["csrf"] ?? ""));
 
     $title = trim((string)($body["title"] ?? ""));
     $desc  = trim((string)($body["description"] ?? ""));
-    $goal  = (int)($body["goal"] ?? 0);
+    $goal  = (float)($body["goal"] ?? 0);
 
     if ($title === "" || $desc === "" || $goal <= 0) {
       http_response_code(422);
@@ -31,14 +30,11 @@ final class NgoProjectApiController {
       exit;
     }
 
-    $id = ProjectModel::createPending([
-      "ngo_id" => (int)$me["id"],
-      "title" => $title,
-      "description" => $desc,
-      "goal" => $goal
-    ]);
+    $id = ProjectModel::createPending((int)$me["id"], $title, $desc, $goal);
 
     echo json_encode(["success"=>true,"id"=>$id]);
     exit;
   }
 }
+
+
