@@ -34,7 +34,7 @@
       <a class="btn" href="projects.html"><i class="fa-solid fa-compass" aria-hidden="true"></i> Explore Projects</a>
     </div>
     <div class="hero-right">
-      <!-- Placeholder image (add your own image later) -->
+
       <img src="images/hero-placeholder.jpg" alt="Community project placeholder" class="hero-img">
     </div>
   </main>
@@ -59,7 +59,7 @@
 
   <hr>
 
-  <!-- Footer (same structure reused on other pages) -->
+  
   <footer id="footer">
     <div id="news-section">
       <h2 id="news-title">SIGN UP <span class="highlight">TO RECEIVE NEWS AND UPDATES FROM US.</span></h2>

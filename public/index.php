@@ -8,16 +8,13 @@ require_once __DIR__ . "/../app/models/user_model.php";
 
 $path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 
-// ✅ adjust base path (your folder name)
 $base = "/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_group_10/public";
 if (str_starts_with($path, $base)) {
   $path = substr($path, strlen($base));
 }
 $path = $path ?: "/";
 
-// --------------------
-// AUTH API routes
-// --------------------
+
 if ($path === "/api/auth/login") {
   require_once __DIR__ . "/../app/controllers/auth_login.php";
   exit;
@@ -33,9 +30,7 @@ if ($path === "/logout") {
   exit;
 }
 
-// --------------------
-// PROJECT API routes
-// --------------------
+
 if ($path === "/api/ngo/project/submit") {
   require_once __DIR__ . "/../app/controllers/NgoProjectApiController.php";
   (new NgoProjectApiController())->submit();
@@ -64,6 +59,7 @@ if ($path === "/project_submit") {
 // --------------------
 // PAGE routes (views)
 // --------------------
+
 if ($path === "/" || $path === "/home") { view("home"); exit; }
 
 if ($path === "/login") { view("login"); exit; }

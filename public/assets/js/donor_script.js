@@ -3,7 +3,6 @@
 
   const $ = (id) => document.getElementById(id);
 
-  // UI nodes
   const donorName = $("donorName");
   const donorEmail = $("donorEmail");
   const logoutBtn = $("logoutBtn");
@@ -26,13 +25,13 @@
   const projectSort = $("projectSort");
   const favOnly = $("favOnly");
 
-  // Local storage keys
+  
   const HISTORY_KEY = "donorHistory";
   const APPROVED_KEY = "approvedProjects";
   const THEME_KEY = "donorTheme";
   const FAV_KEY = `donorFavorites:${(user.email || "anon").toLowerCase()}`;
 
-  // ---------- Theme ----------
+
   function applyTheme(theme) {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem(THEME_KEY, theme);
@@ -46,17 +45,17 @@
     applyTheme(t);
   });
 
-  // ---------- Logout ----------
+  
   logoutBtn?.addEventListener("click", async () => {
-    // Try PHP logout endpoint if present; otherwise wipe session-ish demo data
+    
     try {
       await fetch("logout.php", { method: "POST" });
     } catch (e) {}
-    // Many demo projects store current user in session only
+    
     window.location.href = "index.html";
   });
 
-  // ---------- Helpers ----------
+  
   const fmtBDT = (n) => {
     const num = Number(n || 0);
     try {
@@ -82,7 +81,7 @@
     return Array.from(new Set(arr));
   }
 
-  // ---------- Data loading ----------
+  
   async function loadVerifiedProjectsFromXML() {
     try {
       const res = await fetch("projects.xml", { cache: "no-store" });
@@ -115,7 +114,7 @@
   async function loadProjects() {
     const approved = safeJSON(APPROVED_KEY, []);
     if (Array.isArray(approved) && approved.length > 0) {
-      // Normalize expected fields
+      
       return approved.map((p, i) => ({
         id: p.id || p.projectId || p.title || `ap_${i}`,
         title: p.title || p.projectTitle || "Untitled Project",
@@ -127,7 +126,7 @@
         status: p.status || "approved",
       }));
     }
-    // Fallback to projects.xml
+    
     return await loadVerifiedProjectsFromXML();
   }
 
@@ -135,7 +134,6 @@
     const all = safeJSON(HISTORY_KEY, []);
     if (!Array.isArray(all)) return [];
     const email = norm(user.email);
-    // Try to match stored email field names
     return all.filter((h) => {
       const e = norm(h.email || h.donorEmail || h.userEmail);
       return email && e === email;
@@ -150,7 +148,6 @@
     localStorage.setItem(FAV_KEY, JSON.stringify(ids));
   }
 
-  // ---------- Render: Stats ----------
   function renderStats(history) {
     const amounts = history.map((h) => Number(h.amount || h.donationAmount || h.amt || 0));
     const total = amounts.reduce((a, b) => a + b, 0);
@@ -170,7 +167,6 @@
     statLast.textContent = last ? last.toLocaleDateString() : "—";
   }
 
-  // ---------- Render: History ----------
   function fillHistoryProjectFilter(history) {
     const names = uniq(history.map((h) => h.project || h.projectTitle || h.title || "").filter(Boolean)).sort();
     historyProject.innerHTML = `<option value="">All projects</option>` + names.map((n) => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join("");
@@ -247,7 +243,7 @@
     a.remove();
   }
 
-  // ---------- Render: Projects ----------
+  
   function updateSuggestions(projects) {
     const titles = uniq(projects.map((p) => p.title).filter(Boolean)).sort((a, b) => a.localeCompare(b));
     projectSuggestions.innerHTML = titles.map((t) => `<option value="${escapeHtml(t)}"></option>`).join("");
@@ -266,7 +262,6 @@
         return arr.sort((a, b) => String(a.title).localeCompare(String(b.title)));
       case "recommended":
       default:
-        // recommended = verified + higher progress first, then more raised
         return arr.sort((a, b) => (progress(b) - progress(a)) || ((b.raised || 0) - (a.raised || 0)));
     }
   }
@@ -363,7 +358,6 @@
     });
   }
 
-  // ---------- Boot ----------
   donorName.textContent = user.name || "Donor";
   donorEmail.textContent = user.email || "—";
 

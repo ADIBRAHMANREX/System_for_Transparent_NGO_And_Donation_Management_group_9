@@ -31,6 +31,51 @@ if (!ngoName) {
 // Demo donations (optional - uses localStorage)
 // --------------------
 (function renderDemoDonations() {
+async function loadNgoDashboard() {
+  
+  const projectOwnerByTitle = {};
+  let hasVerifiedProject = false;
+
+  try {
+    const resp = await fetch("projects.xml");
+    if (!resp.ok) throw new Error("Could not load projects.xml");
+
+    const text = await resp.text();
+    const xml = new DOMParser().parseFromString(text, "application/xml");
+    const projects = xml.querySelectorAll("project");
+
+    if (projectsList) projectsList.innerHTML = "";
+
+    projects.forEach((p) => {
+      const title = p.querySelector("title")?.textContent || "";
+      const ngo = p.querySelector("ngo")?.textContent || "";
+      const verified = p.querySelector("verified")?.textContent === "true";
+
+      if (title) projectOwnerByTitle[title] = ngo;
+
+      if (ngoName && ngo.toLowerCase().startsWith(ngoName.toLowerCase())) {
+        if (projectsList) {
+          const li = document.createElement("li");
+          li.textContent = title + (verified ? " (Verified project)" : "");
+          projectsList.appendChild(li);
+        }
+        if (verified) hasVerifiedProject = true;
+      }
+    });
+
+    if (projectsList && !projectsList.hasChildNodes()) {
+      projectsList.innerHTML = "<li>No projects found for this NGO in projects.xml (demo).</li>";
+    }
+
+    if (ngoStatusEl) {
+      ngoStatusEl.textContent = hasVerifiedProject ? "Verified (has verified projects)" : "Unverified";
+    }
+  } catch (err) {
+    console.error(err);
+    if (projectsList) projectsList.innerHTML = "<li>Could not load projects.xml.</li>";
+    if (ngoStatusEl) ngoStatusEl.textContent = "Unverified";
+  }
+
   if (!donationsBody) return;
   if (!ngoName) return;
 
@@ -115,6 +160,7 @@ if (logoutBtn) logoutBtn.onclick = () => (window.location.href = `${APP_BASE}/lo
 // --------------------
 // Hide submission card if NGO not approved
 // --------------------
+
 const submitCard = document.getElementById("projectSubmissionCard");
 if (submitCard && (!session || session.status !== "approved")) {
   submitCard.style.display = "none";
@@ -132,6 +178,9 @@ if (submitCard && (!session || session.status !== "approved")) {
   if (form.dataset.bound === "1") return;
   form.dataset.bound = "1";
 
+
+const form = document.getElementById("projectSubmissionForm");
+if (form) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -167,6 +216,12 @@ if (submitCard && (!session || session.status !== "approved")) {
         alert("Server returned non-JSON (PHP error). Check XAMPP Apache logs.");
         return;
       }
+    const payload = {
+      csrf: window.PHP_CSRF,
+      title: title,
+      description: description, 
+      goal: goal
+    };
 
       if (!data.success) {
         alert(data.error || "Project submit failed.");
@@ -185,6 +240,10 @@ if (submitCard && (!session || session.status !== "approved")) {
 })();
 
 
+    document.getElementById("projSubmitMsg").style.display = "block";
+    form.reset();
+  });
+}
 
 
 

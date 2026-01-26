@@ -2,10 +2,6 @@ document.querySelector('.brand').onclick = function(){
     window.location.href = "index.html";
 };
 
-
-// Basic UI behaviors for navigation and demo login/signup (frontend-only mock)
-
-// Sign up newsletter (footer)
 document.addEventListener('DOMContentLoaded', function () {
   const newsSubmit = document.getElementById('news-submit');
   if (newsSubmit) {
@@ -21,8 +17,4 @@ document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('news-input').value = '';
     });
   }
-
-  // Social icons already have anchors in HTML.
-
-  // Demo login check: if using login.html will check localStorage (see login.html)
 });

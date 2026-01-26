@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . "/../controllers/auth_guard.php";
-$me = require_login("donor"); // ensures logged in and donor role
+$me = require_login("donor"); 
 
 $payload = [
   "name"  => $me["name"] ?? "Donor",
@@ -19,7 +19,6 @@ $base = "/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Donor Dashboard</title>
-    <!-- Correct relative path to CSS file -->
     <link rel="stylesheet" href="assets/css/donor_style.css" />
 </head>
 <body>
@@ -36,7 +35,7 @@ $base = "/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_
 </div>
 
 <div class="container">
-    <!-- Profile Section -->
+    
     <div class="section" id="profileSection">
         <h3>Welcome, <?php echo htmlspecialchars($payload['name']); ?></h3>
         <p><strong>Email:</strong> <?php echo htmlspecialchars($payload['email']); ?></p>
@@ -50,7 +49,6 @@ $base = "/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_
         </div>
     </div>
 
-    <!-- Donation History Section -->
     <div class="section" id="historySection" style="display: none;">
         <h3>Donation History</h3>
         <table class="history-table">
@@ -73,7 +71,6 @@ $base = "/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_
         </table>
     </div>
 
-    <!-- Projects Section -->
     <div class="section" id="projectsSection" style="display: none;">
         <h3>Projects</h3>
         <div class="project-container">
@@ -94,7 +91,6 @@ $base = "/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_
         </div>
     </div>
 
-    <!-- Rewards Section -->
     <div class="section" id="rewardsSection" style="display: none;">
         <h3>Rewards & Achievements</h3>
         <div class="reward-card">
@@ -103,7 +99,6 @@ $base = "/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_
         </div>
     </div>
 
-    <!-- Recurring Donations Section -->
     <div class="section" id="recurringSection" style="display: none;">
         <h3>Recurring Donations</h3>
         <p>Set up your recurring donation amount:</p>
@@ -112,25 +107,25 @@ $base = "/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_
     </div>
 </div>
 
-<!-- Correct relative path to JS file -->
+
 <script src="assets/js/donor_script.js"></script>
 
 <script>
-    // Dynamically switch between sections when the corresponding button is clicked
+    
     function showSection(sectionId) {
         const sections = document.querySelectorAll('.section');
         sections.forEach(section => section.style.display = 'none');
         document.getElementById(sectionId).style.display = 'block';
     }
 
-    // Button Click Handlers to show respective sections
+    
     document.getElementById('profileBtn').onclick = () => showSection('profileSection');
     document.getElementById('historyBtn').onclick = () => showSection('historySection');
     document.getElementById('projectsBtn').onclick = () => showSection('projectsSection');
     document.getElementById('rewardsBtn').onclick = () => showSection('rewardsSection');
     document.getElementById('recurringBtn').onclick = () => showSection('recurringSection');
 
-    // Load Profile Section by default
+    
     showSection('profileSection');
 </script>
 
