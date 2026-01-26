@@ -31,9 +31,10 @@ final class AdminProjectApiController {
       exit;
     }
 
-    ProjectModel::setStatus($id, $status);
+    ProjectModel::updateStatus($id, $status);
     echo json_encode(["success"=>true]);
     exit;
   }
 }
+
 

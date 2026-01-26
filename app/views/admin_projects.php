@@ -1,13 +1,14 @@
 <?php
-
-
 declare(strict_types=1);
-require_once __DIR__ . "/../controllers/auth_guard.php";
 
+require_once __DIR__ . "/../controllers/auth_guard.php";
 require_once __DIR__ . "/../controllers/auth_controller.php";
 
 $me = require_login("admin");
 $csrf = AuthController::csrfToken();
+
+// build base like: /webtech_.../System.../public
+$APP_BASE = rtrim(dirname($_SERVER["SCRIPT_NAME"]), "/");
 ?>
 <!doctype html>
 <html lang="en">
@@ -25,8 +26,10 @@ $csrf = AuthController::csrfToken();
     .btn.secondary{background:#eee;color:#111}
     .pill{display:inline-block;padding:3px 8px;border-radius:999px;background:#f1f3f5;font-size:12px}
   </style>
+
   <script>
-    window.PHP_CSRF = "<?= htmlspecialchars($csrf) ?>";
+    window.PHP_CSRF = "<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>";
+    window.APP_BASE = "<?= htmlspecialchars($APP_BASE, ENT_QUOTES, 'UTF-8') ?>";
   </script>
 </head>
 <body>
@@ -34,9 +37,8 @@ $csrf = AuthController::csrfToken();
   <div class="top">
     <h2>Project Requests</h2>
     <div>
-      <a class="btn secondary"  href="admin" style="text-decoration:none;display:inline-block;">NGO Approvals</a>
-      <a class="btn secondary" href="/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_group_10/public/logout"
->Logout</a>
+      <a class="btn secondary" href="<?= $APP_BASE ?>/admin" style="text-decoration:none;display:inline-block;">Admin Panel</a>
+      <a class="btn secondary" href="<?= $APP_BASE ?>/logout" style="text-decoration:none;display:inline-block;">Logout</a>
     </div>
   </div>
 
@@ -64,17 +66,25 @@ $csrf = AuthController::csrfToken();
 </div>
 
 <script>
+function escapeHtml(s){
+  return String(s)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
 async function loadPending(){
   const body = document.getElementById("pendingBody");
   body.innerHTML = '<tr><td colspan="8">Loading...</td></tr>';
 
   try{
-    const res = await fetch("/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_group_10/public/api/admin/projects")
-;
+    const res = await fetch(`${window.APP_BASE}/api/admin/projects`);
     const data = await res.json();
 
     if(!data.success){
-      body.innerHTML = `<tr><td colspan="8">${data.error || "Failed to load."}</td></tr>`;
+      body.innerHTML = `<tr><td colspan="8">${escapeHtml(data.error || "Failed to load.")}</td></tr>`;
       return;
     }
 
@@ -109,12 +119,12 @@ async function loadPending(){
 }
 
 async function act(id, status){
-  const res = await fetch("/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_group_10/public/api/admin/project/action",
-, {
+  const res = await fetch(`${window.APP_BASE}/api/admin/project/action`, {
     method:"POST",
     headers: {"Content-Type":"application/json"},
     body: JSON.stringify({ csrf: window.PHP_CSRF, id, status })
   });
+
   const data = await res.json();
   if(!data.success){
     alert(data.error || "Action failed");
@@ -123,18 +133,10 @@ async function act(id, status){
   loadPending();
 }
 
-function escapeHtml(s){
-  return String(s)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-
 loadPending();
 </script>
 </body>
 </html>
+
 
 

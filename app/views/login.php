@@ -21,6 +21,8 @@ $BASE = "/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_
   </style>
 </head>
 <body>
+   <a href="/webtech_22-47887-2/System_for_Transparent_NGO_And_Donation_Management_group_10/public" class="brand">Believe</a>
+
 <main class="wrap">
   <h2>Login</h2>
 

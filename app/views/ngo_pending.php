@@ -13,7 +13,7 @@ $_SESSION['user'] = [
 
 // Not logged in → login
 if (!isset($_SESSION['user'])) {
-  header("Location: login.php");
+  header("Location: login");
   exit;
 }
 
@@ -27,7 +27,7 @@ if ($user['role'] !== 'ngo') {
 
 // If NGO already approved → dashboard
 if ($user['status'] === 'approved') {
-  header("Location: ngo.html");
+  header("Location: ngo");
   exit;
 }
 ?>
